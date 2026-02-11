@@ -8,6 +8,20 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: techsupport-postgres
+    environment:
+      POSTGRES_USER: techsupport
+      POSTGRES_PASSWORD: techsupport
+      POSTGRES_DB: techsupport
+    ports:
+      - "5432:5432"
     volumes:
-      - .:/app
-    command: npm run dev
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ClientType {
+  VIP
+  NORMAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  type      ClientType
+  company   String
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+}
+
+model Agent {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  level     Int
+  active    Boolean  @default(true)
+  tickets   Ticket[]
+}
+
+model Ticket {
+  id                String       @id @default(uuid())
+  title             String
+  description       String
+  status            TicketStatus
+  priority          Int
+  clientId          String
+  agentId           String?
+  escalationLevel   Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  resolvedAt        DateTime?
+  resolutionTimeMin Int?
+  deletedAt         DateTime?
+
+  client Client @relation(fields: [clientId], references: [id])
+  agent  Agent? @relation(fields: [agentId], references: [id])
+
+  @@index([status])
+  @@index([clientId])
+  @@index([createdAt])
+}
