@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import multer from 'multer';
 import { FileProcessingService } from '../../../application/services/FileProcessingService';
 
+interface StatusParams {
+  processId: string;
+}
+
 const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
 });
@@ -20,7 +24,7 @@ export class FileController {
     res.status(202).json(result);
   }
 
-  static async status(req: Request, res: Response) {
+  static async status(req: Request<StatusParams>, res: Response) {
     const result = await service.getStatus(req.params.processId);
     res.json(result);
   }

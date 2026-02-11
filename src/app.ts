@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { errorMiddleware } from './infrastructure/http/middlewares/error.middleware';
 import { notFoundMiddleware } from './infrastructure/http/middlewares/notFound.middleware';
+import router from './infrastructure/http/routes';
 
 export const app = express();
 const limiter = rateLimit({
@@ -22,6 +23,6 @@ app.use(morgan('dev'));
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
 });
-
+app.use('/api', router);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
