@@ -1,26 +1,73 @@
 import { TicketRepository } from '../ports/TicketRepository';
 import { Ticket } from '../../domain/entities/Ticket';
 import { TicketStatus } from '../../domain/enums/TicketStatus';
+import { ApplicationError } from '../errors/ApplicationError';
 
 export class TicketService {
-    constructor(private readonly repo: TicketRepository) { }
+  constructor(private readonly repo: TicketRepository) { }
 
-    async create(data: any) {
-        const ticket = new Ticket({
-            ...data,
-            status: TicketStatus.OPEN,
-            escalationLevel: 0,
-            createdAt: new Date(),
-        });
+  async create(data: any) {
+    const ticket = new Ticket({
+      ...data,
+      status: TicketStatus.OPEN,
+      escalationLevel: 0,
+      createdAt: new Date(),
+    });
 
-        return this.repo.create(ticket);
+    return this.repo.create(ticket);
+  }
+
+  async list() {
+    return this.repo.findAll({});
+  }
+
+  async delete(id: string) {
+    await this.repo.softDelete(id);
+  }
+
+  async assignAgent(ticketId: string, agent: { id: string; level: number }) {
+    const ticket = await this.repo.findById(ticketId);
+
+    if (!ticket) {
+      throw new ApplicationError('Ticket not found', 404);
     }
 
-    async list() {
-        return this.repo.findAll({});
+    if (
+      ticket.status === TicketStatus.ESCALATED &&
+      agent.level < 2
+    ) {
+      throw new ApplicationError(
+        'Escalated tickets require level 2+ agent',
+        403,
+      );
     }
 
-    async delete(id: string) {
-        await this.repo.softDelete(id);
+    ticket['props'].agentId = agent.id;
+
+    return this.repo.update(ticket);
+  }
+
+  async changeStatus(id: string, newStatus: TicketStatus) {
+    const ticket = await this.repo.findById(id);
+
+    if (!ticket) {
+      throw new ApplicationError('Ticket not found', 404);
     }
+
+    switch (newStatus) {
+      case TicketStatus.IN_PROGRESS:
+        ticket.startProgress();
+        break;
+
+      case TicketStatus.RESOLVED:
+        ticket.resolve();
+        break;
+
+      case TicketStatus.ESCALATED:
+        ticket.escalate();
+        break;
+    }
+
+    return this.repo.update(ticket);
+  }
 }
