@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../database/prisma';
 import { TicketRepository } from '../../application/ports/TicketRepository';
 import { Ticket } from '../../domain/entities/Ticket';
-
-const prisma = new PrismaClient();
+import { TicketMapper } from '../mappers/TicketMapper';
 
 export class PrismaTicketRepository implements TicketRepository {
     async create(ticket: Ticket): Promise<Ticket> {
@@ -34,7 +33,7 @@ export class PrismaTicketRepository implements TicketRepository {
         ]);
 
         return {
-            data: data.map((t) => new Ticket(t as any)),
+            data: data.map(TicketMapper.toDomain),
             total,
         };
     }

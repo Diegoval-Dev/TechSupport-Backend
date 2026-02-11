@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { TicketService } from '../../../application/services/TicketService';
 import { PrismaTicketRepository } from '../../repositories/PrismaTicketRepository';
 
+interface DeleteTicketParams {
+    id: string;
+}
+
 const service = new TicketService(new PrismaTicketRepository());
 
 export class TicketController {
@@ -15,7 +19,10 @@ export class TicketController {
         res.json(result);
     }
 
-    static async delete(req: Request, res: Response) {
+    static async delete(
+        req: Request<DeleteTicketParams>,
+        res: Response,
+    ) {
         await service.delete(req.params.id);
         res.status(204).send();
     }
