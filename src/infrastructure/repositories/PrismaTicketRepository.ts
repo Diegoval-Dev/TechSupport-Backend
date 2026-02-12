@@ -108,7 +108,7 @@ export class PrismaTicketRepository implements TicketRepository {
     });
   }
 
-  async updateStatus(id: string, newStatus: string) {
+  async updateStatus(id: string, newStatus: TicketStatus) {
     return prisma.$transaction(async (tx) => {
       const ticket = await tx.ticket.findUnique({
         where: { id },
@@ -118,18 +118,55 @@ export class PrismaTicketRepository implements TicketRepository {
         throw new Error('Ticket not found');
       }
 
-      if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') {
+      if (ticket.status === TicketStatus.RESOLVED || ticket.status === TicketStatus.CLOSED) {
         throw new Error('Cannot modify closed ticket');
+      }
+
+
+      const domainTicket = TicketMapper.toDomain(ticket);
+      switch (newStatus) {
+        case TicketStatus.IN_PROGRESS:
+          domainTicket.startProgress();
+          break;
+        case TicketStatus.RESOLVED:
+          domainTicket.resolve();
+          break;
+        case TicketStatus.ESCALATED:
+          domainTicket.escalate();
+          break;
+        default:
+          throw new Error(`Invalid status transition to ${newStatus}`);
       }
 
       const updated = await tx.ticket.update({
         where: { id },
         data: {
-          status: newStatus as TicketStatus,
+          status: domainTicket.status,
+          escalationLevel: domainTicket['props'].escalationLevel,
+          resolvedAt: domainTicket['props'].resolvedAt ?? null,
+          resolutionTimeMin: domainTicket['props'].resolutionTimeMin ?? null,
         },
       });
 
       return TicketMapper.toDomain(updated);
     });
   }
-}
+
+  async updateAgent(id: string, agentId: string) {
+    return prisma.$transaction(async (tx) => {
+      const ticket = await tx.ticket.findUnique({
+        where: { id },
+      });
+
+      if (!ticket || ticket.deletedAt) {
+        throw new Error('Ticket not found');
+      }
+
+      const updated = await tx.ticket.update({
+        where: { id },
+        data: { agentId },
+      });
+
+      return TicketMapper.toDomain(updated);
+    });
+  }}

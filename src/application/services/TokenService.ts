@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 import { signToken } from '../../infrastructure/auth/jwt';
 import { RefreshTokenRepository } from '../ports/RefreshTokenRepository';
 import { UserRole } from '../../domain/enums/UserRole';
@@ -8,7 +8,9 @@ export class TokenService {
 
   async generateTokens(userId: string, role: UserRole) {
     const accessToken = signToken({ sub: userId, role });
-    const refreshToken = randomUUID();
+
+    const refreshToken = randomBytes(32).toString('hex');
+
 
     await this.refreshRepo.save(userId, refreshToken);
 
@@ -22,4 +24,12 @@ export class TokenService {
   async revokeRefreshToken(userId: string, token: string) {
     await this.refreshRepo.delete(userId, token);
   }
+
+  async rotateRefreshToken(userId: string, oldToken: string, role: UserRole) {
+
+    await this.refreshRepo.delete(userId, oldToken);
+
+    return this.generateTokens(userId, role);
+  }
 }
+

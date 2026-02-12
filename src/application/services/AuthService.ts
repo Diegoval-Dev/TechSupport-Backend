@@ -33,7 +33,13 @@ export class AuthService {
       throw new ApplicationError('Invalid refresh token', 401);
     }
 
-    return this.tokenService.generateTokens(userId, UserRole.AGENT);
+
+    const user = await this.userRepo.findById(userId);
+    if (!user || !user.active) {
+      throw new ApplicationError('User not active', 401);
+    }
+
+    return this.tokenService.generateTokens(userId, user.role);
   }
 
   async logout(userId: string, refreshToken: string) {

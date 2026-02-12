@@ -7,7 +7,7 @@ export const loginSchema = z.object({
 });
 
 export const refreshSchema = z.object({
-  refreshToken: z.string().uuid(),
+  refreshToken: z.string().min(32),
 });
 
 export const registerSchema = z.object({

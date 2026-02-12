@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../../../application/services/AuthService';
-import { InMemoryUserRepository } from '../../repositories/InMemoryUserRepository';
-import { InMemoryRefreshTokenRepository } from '../../repositories/InMemoryRefreshTokenRepository';
+import { PrismaUserRepository } from '../../repositories/PrismaUserRepository';
+import { PrismaRefreshTokenRepository } from '../../repositories/PrismaRefreshTokenRepository';
 import { TokenService } from '../../../application/services/TokenService';
 import { loginSchema, refreshSchema, registerSchema } from '../validators/auth.schemas';
 
-const userRepo = new InMemoryUserRepository();
-const refreshRepo = new InMemoryRefreshTokenRepository();
+const userRepo = new PrismaUserRepository();
+const refreshRepo = new PrismaRefreshTokenRepository();
 const tokenService = new TokenService(refreshRepo);
 const authService = new AuthService(userRepo, tokenService);
 

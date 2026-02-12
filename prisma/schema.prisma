@@ -26,6 +26,13 @@ enum TicketStatus {
   ESCALATED
 }
 
+enum UserRole {
+  ADMIN
+  SUPERVISOR
+  AGENTE
+}
+
+
 
 
 model Client {
@@ -68,4 +75,32 @@ model Ticket {
   @@index([status])
   @@index([clientId])
   @@index([createdAt])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  passwordHash String
+  role      UserRole
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, token])
+  @@index([userId])
+  @@index([expiresAt])
 }

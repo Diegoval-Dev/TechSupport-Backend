@@ -22,4 +22,8 @@ export interface TicketRepository {
   }>;
   update(ticket: Ticket): Promise<Ticket>;
   softDelete(id: string): Promise<void>;
+  updateStatus(id: string, newStatus: TicketStatus): Promise<Ticket>;
+  updateAgent(id: string, agentId: string): Promise<Ticket>;
+  updateStatus(id: string, newStatus: TicketStatus): Promise<Ticket>;
+  updateAgent(id: string, agentId: string): Promise<Ticket>;
 }

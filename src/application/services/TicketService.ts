@@ -46,32 +46,10 @@ export class TicketService {
       throw new ApplicationError('Escalated tickets require level 2+ agent', 403);
     }
 
-    ticket['props'].agentId = agent.id;
-
-    return this.repo.update(ticket);
+    return this.repo.updateAgent(ticketId, agent.id);
   }
 
   async changeStatus(id: string, newStatus: TicketStatus) {
-    const ticket = await this.repo.findById(id);
-
-    if (!ticket) {
-      throw new ApplicationError('Ticket not found', 404);
-    }
-
-    switch (newStatus) {
-      case TicketStatus.IN_PROGRESS:
-        ticket.startProgress();
-        break;
-
-      case TicketStatus.RESOLVED:
-        ticket.resolve();
-        break;
-
-      case TicketStatus.ESCALATED:
-        ticket.escalate();
-        break;
-    }
-
-    return this.repo.update(ticket);
+    return this.repo.updateStatus(id, newStatus);
   }
 }
