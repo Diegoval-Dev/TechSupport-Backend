@@ -35,17 +35,19 @@ app.use((req: Request, res: Response, next: (err?: unknown) => void) => {
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
 app.get('/health/metrics', async (_req, res) => {
   res.json({
     uptimeSeconds: process.uptime(),
     memoryUsage: process.memoryUsage(),
   });
 });
-app.use('/api', router);
-app.use(notFoundMiddleware);
-app.use(errorMiddleware);
 
 app.get('/metrics', async (_req, res) => {
   res.setHeader('Content-Type', register.contentType);
   res.end(await register.metrics());
 });
+
+app.use('/api', router);
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
