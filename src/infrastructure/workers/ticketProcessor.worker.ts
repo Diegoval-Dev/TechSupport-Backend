@@ -7,6 +7,10 @@ import { FileProcess } from '../database/models/FileProcess';
 import { ticketLogSchema } from '../validators/ticketLog.schema';
 
 export const startTicketWorker = () => {
+  if (!redisConfig) {
+    throw new Error('Redis configuration is not available');
+  }
+
   const worker = new Worker(
     'ticket-processing',
     async (job) => {
