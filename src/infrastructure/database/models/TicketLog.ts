@@ -14,4 +14,12 @@ const TicketLogSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const TicketLog = mongoose.model('TicketLog', TicketLogSchema);
+TicketLogSchema.index({ createdAt: 1 });
+TicketLogSchema.index({ clientType: 1 });
+TicketLogSchema.index({ agentId: 1 });
+TicketLogSchema.index({ escalationLevel: 1 });
+
+export const TicketLog = mongoose.model(
+  'TicketLog',
+  TicketLogSchema,
+);
