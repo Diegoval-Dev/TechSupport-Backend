@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import {
-  httpRequestCounter,
-  httpRequestDuration,
-} from '../../observability/metrics';
+import { httpRequestCounter, httpRequestDuration } from '../../observability/metrics';
 
-export const metricsMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const start = process.hrtime();
 
   res.on('finish', () => {

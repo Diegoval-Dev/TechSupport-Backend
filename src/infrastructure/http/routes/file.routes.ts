@@ -3,15 +3,8 @@ import { FileController } from '../controllers/FileController';
 
 const router = Router();
 
-router.post(
-  '/upload',
-  FileController.uploadMiddleware,
-  FileController.upload,
-);
+router.post('/upload', FileController.uploadMiddleware, FileController.upload);
 
-router.get(
-  '/status/:processId',
-  FileController.status,
-);
+router.get('/status/:processId', FileController.status);
 
 export default router;

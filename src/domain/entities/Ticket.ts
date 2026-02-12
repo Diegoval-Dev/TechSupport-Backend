@@ -15,10 +15,8 @@ export interface TicketProps {
   resolutionTimeMin?: number;
 }
 
-
-
 export class Ticket {
-  constructor(private readonly props: TicketProps) { }
+  constructor(private readonly props: TicketProps) {}
 
   get status() {
     return this.props.status;

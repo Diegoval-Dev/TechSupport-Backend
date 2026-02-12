@@ -8,20 +8,11 @@ const FileProcessSchema = new mongoose.Schema(
     failed: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: [
-        'pending',
-        'processing',
-        'completed',
-        'completed_with_errors',
-        'failed',
-      ],
+      enum: ['pending', 'processing', 'completed', 'completed_with_errors', 'failed'],
       default: 'pending',
     },
   },
   { timestamps: true },
 );
 
-export const FileProcess = mongoose.model(
-  'FileProcess',
-  FileProcessSchema,
-);
+export const FileProcess = mongoose.model('FileProcess', FileProcessSchema);

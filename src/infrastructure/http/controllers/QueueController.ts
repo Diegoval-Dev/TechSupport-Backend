@@ -4,13 +4,12 @@ import { deadLetterQueue } from '../../queue/deadLetterQueue';
 
 export class QueueController {
   static async stats(_req: Request, res: Response) {
-    const [waiting, active, completed, failed] =
-      await Promise.all([
-        getTicketQueue().getWaitingCount(),
-        getTicketQueue().getActiveCount(),
-        getTicketQueue().getCompletedCount(),
-        getTicketQueue().getFailedCount(),
-      ]);
+    const [waiting, active, completed, failed] = await Promise.all([
+      getTicketQueue().getWaitingCount(),
+      getTicketQueue().getActiveCount(),
+      getTicketQueue().getCompletedCount(),
+      getTicketQueue().getFailedCount(),
+    ]);
 
     const dlqCount = await deadLetterQueue.getWaitingCount();
 

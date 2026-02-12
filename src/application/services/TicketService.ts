@@ -3,15 +3,24 @@ import { Ticket } from '../../domain/entities/Ticket';
 import { TicketStatus } from '../../domain/enums/TicketStatus';
 import { ApplicationError } from '../errors/ApplicationError';
 
-export class TicketService {
-  constructor(private readonly repo: TicketRepository) { }
+interface CreateTicketData {
+  title: string;
+  description: string;
+  userId: string;
+}
 
-  async create(data: any) {
+export class TicketService {
+  constructor(private readonly repo: TicketRepository) {}
+
+  async create(data: CreateTicketData) {
     const ticket = new Ticket({
+      id: crypto.randomUUID(),
       ...data,
       status: TicketStatus.OPEN,
       escalationLevel: 0,
       createdAt: new Date(),
+      priority: 2,
+      clientId: '',
     });
 
     return this.repo.create(ticket);
@@ -32,14 +41,8 @@ export class TicketService {
       throw new ApplicationError('Ticket not found', 404);
     }
 
-    if (
-      ticket.status === TicketStatus.ESCALATED &&
-      agent.level < 2
-    ) {
-      throw new ApplicationError(
-        'Escalated tickets require level 2+ agent',
-        403,
-      );
+    if (ticket.status === TicketStatus.ESCALATED && agent.level < 2) {
+      throw new ApplicationError('Escalated tickets require level 2+ agent', 403);
     }
 
     ticket['props'].agentId = agent.id;

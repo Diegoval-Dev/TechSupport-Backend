@@ -8,10 +8,7 @@ export class ReportService {
         $project: {
           clientType: 1,
           resolutionMinutes: {
-            $divide: [
-              { $subtract: ['$resolvedAt', '$createdAt'] },
-              1000 * 60,
-            ],
+            $divide: [{ $subtract: ['$resolvedAt', '$createdAt'] }, 1000 * 60],
           },
         },
       },
@@ -48,10 +45,7 @@ export class ReportService {
         $project: {
           agentId: 1,
           resolutionMinutes: {
-            $divide: [
-              { $subtract: ['$resolvedAt', '$createdAt'] },
-              1000 * 60,
-            ],
+            $divide: [{ $subtract: ['$resolvedAt', '$createdAt'] }, 1000 * 60],
           },
         },
       },
@@ -80,8 +74,6 @@ export class ReportService {
     ]);
   }
   async lastProcesses() {
-    return FileProcess.find()
-      .sort({ createdAt: -1 })
-      .limit(10);
+    return FileProcess.find().sort({ createdAt: -1 }).limit(10);
   }
 }

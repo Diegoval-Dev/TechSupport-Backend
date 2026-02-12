@@ -19,7 +19,4 @@ TicketLogSchema.index({ clientType: 1 });
 TicketLogSchema.index({ agentId: 1 });
 TicketLogSchema.index({ escalationLevel: 1 });
 
-export const TicketLog = mongoose.model(
-  'TicketLog',
-  TicketLogSchema,
-);
+export const TicketLog = mongoose.model('TicketLog', TicketLogSchema);

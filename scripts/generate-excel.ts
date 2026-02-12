@@ -1,6 +1,5 @@
 import * as XLSX from 'xlsx';
 import { randomUUID } from 'crypto';
-import fs from 'fs';
 
 const TOTAL = 5000;
 
@@ -12,9 +11,7 @@ for (let i = 0; i < TOTAL; i++) {
     client_id: randomUUID(),
     tipo_cliente: Math.random() > 0.5 ? 'VIP' : 'NORMAL',
     fecha_creacion: new Date().toISOString(),
-    fecha_resolucion: new Date(
-      Date.now() + Math.random() * 10000000,
-    ).toISOString(),
+    fecha_resolucion: new Date(Date.now() + Math.random() * 10000000).toISOString(),
     agente_id: randomUUID(),
     nivel_escalamiento: Math.floor(Math.random() * 3),
     estado: 'RESOLVED',
