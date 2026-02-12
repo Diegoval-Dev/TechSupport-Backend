@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import { AuthService } from '../../../application/services/AuthService';
 import { PrismaUserRepository } from '../../repositories/PrismaUserRepository';
 import { PrismaRefreshTokenRepository } from '../../repositories/PrismaRefreshTokenRepository';
@@ -12,39 +13,79 @@ const authService = new AuthService(userRepo, tokenService);
 
 export class AuthController {
   static async register(req: Request, res: Response) {
-    const data = registerSchema.parse(req.body);
-    const user = await authService.register(
-      data.email,
-      data.password,
-      data.role,
-      data.active ?? true,
-    );
+    try {
+      const data = registerSchema.parse(req.body);
+      const user = await authService.register(
+        data.email,
+        data.password,
+        data.role,
+        data.active ?? true,
+      );
 
-    res.status(201).json({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      active: user.active,
-    });
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        active: user.active,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async login(req: Request, res: Response) {
-    const data = loginSchema.parse(req.body);
-    const result = await authService.login(data.email, data.password);
-    res.json(result);
+    try {
+      const data = loginSchema.parse(req.body);
+      const result = await authService.login(data.email, data.password);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async refresh(req: Request, res: Response) {
-    const data = refreshSchema.parse(req.body);
-    const userId = req.user.sub;
+    try {
+      const data = refreshSchema.parse(req.body);
+      const userId = req.user.sub;
 
-    const result = await authService.refresh(userId, data.refreshToken);
-    res.json(result);
+      const result = await authService.refresh(userId, data.refreshToken);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async logout(req: Request, res: Response) {
-    const data = refreshSchema.parse(req.body);
-    await authService.logout(req.user.sub, data.refreshToken);
-    res.status(204).send();
+    try {
+      const data = refreshSchema.parse(req.body);
+      await authService.logout(req.user.sub, data.refreshToken);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 }

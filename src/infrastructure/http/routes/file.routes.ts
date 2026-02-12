@@ -13,12 +13,15 @@ const statusParamSchema = z.object({
   processId: z.string().uuid(),
 });
 
-const validateStatusParam = (req: Request, _res: Response, next: NextFunction) => {
+const validateStatusParam = (req: Request, res: Response, next: NextFunction) => {
   try {
     statusParamSchema.parse({ processId: req.params.processId });
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      message: 'Invalid processId format - must be a valid UUID',
+      error: error instanceof z.ZodError ? error.message : 'Unknown error',
+    });
   }
 };
 

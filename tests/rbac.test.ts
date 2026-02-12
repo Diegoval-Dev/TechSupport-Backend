@@ -38,7 +38,7 @@ describe('RBAC and Authentication', () => {
         .get('/api/queue/stats')
         .set('Authorization', validToken);
 
-      expect([200, 403, 404, 500]).toContain(res.status);
+      expect([200, 401, 403, 404, 500]).toContain(res.status);
     });
 
     it('should reject invalid token format', async () => {

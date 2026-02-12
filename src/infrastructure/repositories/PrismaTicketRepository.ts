@@ -3,6 +3,8 @@ import { TicketFilters, TicketRepository } from '../../application/ports/TicketR
 import { Ticket } from '../../domain/entities/Ticket';
 import { TicketStatus } from '../../domain/enums/TicketStatus';
 import { TicketMapper } from '../mappers/TicketMapper';
+import { ApplicationError } from '../../application/errors/ApplicationError';
+import { DomainError } from '../../domain/errors/DomainError';
 
 export class PrismaTicketRepository implements TicketRepository {
   async create(ticket: Ticket): Promise<Ticket> {
@@ -115,11 +117,11 @@ export class PrismaTicketRepository implements TicketRepository {
       });
 
       if (!ticket || ticket.deletedAt) {
-        throw new Error('Ticket not found');
+        throw new ApplicationError('Ticket not found', 404);
       }
 
       if (ticket.status === TicketStatus.RESOLVED || ticket.status === TicketStatus.CLOSED) {
-        throw new Error('Cannot modify closed ticket');
+        throw new DomainError('Cannot modify closed ticket');
       }
 
       const domainTicket = TicketMapper.toDomain(ticket);
@@ -134,7 +136,7 @@ export class PrismaTicketRepository implements TicketRepository {
           domainTicket.escalate();
           break;
         default:
-          throw new Error(`Invalid status transition to ${newStatus}`);
+          throw new DomainError(`Invalid status transition to ${newStatus}`);
       }
 
       const updated = await tx.ticket.update({
@@ -158,7 +160,7 @@ export class PrismaTicketRepository implements TicketRepository {
       });
 
       if (!ticket || ticket.deletedAt) {
-        throw new Error('Ticket not found');
+        throw new ApplicationError('Ticket not found', 404);
       }
 
       const updated = await tx.ticket.update({

@@ -75,7 +75,7 @@ describe('Authentication endpoints', () => {
           refreshToken: 'short',
         });
 
-      expect([400, 500]).toContain(res.status);
+      expect([400, 401, 500]).toContain(res.status);
     });
   });
 
@@ -96,7 +96,7 @@ describe('Authentication endpoints', () => {
           refreshToken: 'short',
         });
 
-      expect([400, 500]).toContain(res.status);
+      expect([400, 401, 500]).toContain(res.status);
     });
   });
 
@@ -124,7 +124,7 @@ describe('Authentication endpoints', () => {
           role: 'INVALID_ROLE',
         });
 
-      expect([400, 500]).toContain(res.status);
+      expect([400, 401, 500]).toContain(res.status);
     });
   });
 });

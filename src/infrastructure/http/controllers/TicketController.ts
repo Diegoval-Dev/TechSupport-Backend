@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { z } from 'zod';
 import { TicketService } from '../../../application/services/TicketService';
 import { PrismaTicketRepository } from '../../repositories/PrismaTicketRepository';
 import {
@@ -37,55 +38,105 @@ const serializeTicket = (ticket: any) => {
 
 export class TicketController {
   static async create(req: Request, res: Response) {
-    const data = createTicketSchema.parse(req.body);
-    const ticket = await service.create(data);
-    const response = ticketResponseSchema.parse(serializeTicket(ticket));
-    res.status(201).json(response);
+    try {
+      const data = createTicketSchema.parse(req.body);
+      const ticket = await service.create(data);
+      const response = ticketResponseSchema.parse(serializeTicket(ticket));
+      res.status(201).json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async list(req: Request, res: Response) {
-    const data = listTicketsSchema.parse(req.query);
-    const normalizedPage = data.page ?? 1;
-    const normalizedPageSize = data.pageSize ?? 20;
-    const result = await service.list({
-      status: data.status,
-      priority: data.priority,
-      clientId: data.clientId,
-      from: data.from,
-      to: data.to,
-      page: normalizedPage,
-      pageSize: normalizedPageSize,
-    });
+    try {
+      const data = listTicketsSchema.parse(req.query);
+      const normalizedPage = data.page ?? 1;
+      const normalizedPageSize = data.pageSize ?? 20;
+      const result = await service.list({
+        status: data.status,
+        priority: data.priority,
+        clientId: data.clientId,
+        from: data.from,
+        to: data.to,
+        page: normalizedPage,
+        pageSize: normalizedPageSize,
+      });
 
-    const response = listTicketsResponseSchema.parse({
-      data: result.data.map(serializeTicket),
-      total: result.total,
-      page: result.page,
-      pageSize: result.pageSize,
-    });
+      const response = listTicketsResponseSchema.parse({
+        data: result.data.map(serializeTicket),
+        total: result.total,
+        page: result.page,
+        pageSize: result.pageSize,
+      });
 
-    res.json(response);
+      res.json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async updateStatus(req: Request, res: Response) {
-    const data = updateStatusSchema.parse(req.body);
-    const updated = await service.changeStatus(req.params.id as string, data.status);
-    const response = ticketResponseSchema.parse(serializeTicket(updated));
-    res.json(response);
+    try {
+      const data = updateStatusSchema.parse(req.body);
+      const updated = await service.changeStatus(req.params.id as string, data.status);
+      const response = ticketResponseSchema.parse(serializeTicket(updated));
+      res.json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body or ticket ID',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async assignAgent(req: Request, res: Response) {
-    const data = assignAgentSchema.parse(req.body);
-    const updated = await service.assignAgent(req.params.id as string, {
-      id: data.agentId,
-      level: data.agentLevel,
-    });
-    const response = ticketResponseSchema.parse(serializeTicket(updated));
-    res.json(response);
+    try {
+      const data = assignAgentSchema.parse(req.body);
+      const updated = await service.assignAgent(req.params.id as string, {
+        id: data.agentId,
+        level: data.agentLevel,
+      });
+      const response = ticketResponseSchema.parse(serializeTicket(updated));
+      res.json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid request body or ticket ID',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 
   static async delete(req: Request<DeleteTicketParams>, res: Response) {
-    await service.delete(req.params.id);
-    res.status(204).send();
+    try {
+      await service.delete(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid ticket ID format',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
   }
 }

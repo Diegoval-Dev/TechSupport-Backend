@@ -25,7 +25,19 @@ export class FileController {
   }
 
   static async status(req: Request<StatusParams>, res: Response) {
-    const result = await service.getStatus(req.params.processId);
-    res.json(result);
+    try {
+      const result = await service.getStatus(req.params.processId);
+      
+      if (!result) {
+        return res.status(404).json({ message: 'Process not found' });
+      }
+      
+      res.json(result);
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Error retrieving process status',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 }
