@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
-import { ticketQueue } from '../../queue/ticketQueue';
+import { getTicketQueue } from '../../queue/ticketQueue';
 import { deadLetterQueue } from '../../queue/deadLetterQueue';
 
 export class QueueController {
   static async stats(_req: Request, res: Response) {
     const [waiting, active, completed, failed] =
       await Promise.all([
-        ticketQueue.getWaitingCount(),
-        ticketQueue.getActiveCount(),
-        ticketQueue.getCompletedCount(),
-        ticketQueue.getFailedCount(),
+        getTicketQueue().getWaitingCount(),
+        getTicketQueue().getActiveCount(),
+        getTicketQueue().getCompletedCount(),
+        getTicketQueue().getFailedCount(),
       ]);
 
     const dlqCount = await deadLetterQueue.getWaitingCount();

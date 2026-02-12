@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
-import { ticketQueue } from '../../infrastructure/queue/ticketQueue';
+import { getTicketQueue } from '../../infrastructure/queue/ticketQueue';
 import { FileProcess } from '../../infrastructure/database/models/FileProcess';
 
 export class FileProcessingService {
@@ -19,7 +19,7 @@ export class FileProcessingService {
     });
 
     for (const row of rows) {
-      await ticketQueue.add('process-ticket', {
+      await getTicketQueue().add('process-ticket', {
         processId,
         row,
       });
