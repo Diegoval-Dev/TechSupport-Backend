@@ -4,6 +4,7 @@ import { TicketLog } from '../database/models/TicketLog';
 import { deadLetterQueue } from '../queue/deadLetterQueue';
 import { logger } from '../logger/logger';
 import { FileProcess } from '../database/models/FileProcess';
+import { ticketLogSchema } from '../validators/ticketLog.schema';
 
 export const startTicketWorker = () => {
   const worker = new Worker(
@@ -16,7 +17,18 @@ export const startTicketWorker = () => {
           setTimeout(res, 100 + Math.random() * 400),
         );
 
-        await TicketLog.create(row);
+        const parsed = ticketLogSchema.parse(row);
+
+        await TicketLog.create({
+          ticketId: parsed.ticket_id,
+          clientId: parsed.client_id,
+          clientType: parsed.tipo_cliente,
+          createdAt: new Date(parsed.fecha_creacion),
+          resolvedAt: new Date(parsed.fecha_resolucion),
+          agentId: parsed.agente_id,
+          escalationLevel: parsed.nivel_escalamiento,
+          status: parsed.estado,
+        });
 
         await FileProcess.updateOne(
           { processId },
@@ -32,7 +44,6 @@ export const startTicketWorker = () => {
           { $inc: { failed: 1 } },
         );
 
-        // DLQ después del último intento (3 intentos totales)
         if (job.attemptsMade + 1 >= job.opts.attempts!) {
           await deadLetterQueue.add('failed-ticket', job.data);
         }

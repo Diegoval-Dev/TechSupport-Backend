@@ -9,7 +9,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "generate:excel": "ts-node scripts/generate-excel.ts"
   },
   "repository": {
     "type": "git",
