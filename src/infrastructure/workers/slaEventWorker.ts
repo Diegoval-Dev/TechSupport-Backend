@@ -1,7 +1,6 @@
 import { Worker } from 'bullmq';
 import { redisConfig } from '../queue/connection';
 import { logger } from '../logger/logger';
-import { getSlaEventQueue } from '../queue/slaEventQueue';
 
 interface SLAEvent {
   ticketId: string;
@@ -23,23 +22,28 @@ export const startSlaEventWorker = () => {
 
       try {
         if (event.escalated) {
-          logger.info({
-            type: 'SLA_ESCALATED',
-            ticketId: event.ticketId,
-            clientType: event.clientType,
-            slaHoursElapsed: event.slaHoursElapsed,
-          }, 'SLA escalation event');
+          logger.info(
+            {
+              type: 'SLA_ESCALATED',
+              ticketId: event.ticketId,
+              clientType: event.clientType,
+              slaHoursElapsed: event.slaHoursElapsed,
+            },
+            'SLA escalation event',
+          );
         }
 
         if (event.needsSupervisorNotif) {
-
-          logger.warn({
-            type: 'SLA_BREACH_NOTIFICATION',
-            ticketId: event.ticketId,
-            clientType: event.clientType,
-            slaHoursElapsed: event.slaHoursElapsed,
-            message: 'Supervisor notification: SLA breached for NORMAL client',
-          }, 'SLA breach notification');
+          logger.warn(
+            {
+              type: 'SLA_BREACH_NOTIFICATION',
+              ticketId: event.ticketId,
+              clientType: event.clientType,
+              slaHoursElapsed: event.slaHoursElapsed,
+              message: 'Supervisor notification: SLA breached for NORMAL client',
+            },
+            'SLA breach notification',
+          );
         }
 
         return { processed: true };

@@ -22,8 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(httpLoggingMiddleware);
 
-
-app.use((req: Request, res: Response, next: Function) => {
+app.use((req: Request, res: Response, next: (err?: unknown) => void) => {
   req.setTimeout(30000, () => {
     res.status(503).json({ message: 'Request timeout' });
   });

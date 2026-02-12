@@ -122,7 +122,6 @@ export class PrismaTicketRepository implements TicketRepository {
         throw new Error('Cannot modify closed ticket');
       }
 
-
       const domainTicket = TicketMapper.toDomain(ticket);
       switch (newStatus) {
         case TicketStatus.IN_PROGRESS:
@@ -169,4 +168,5 @@ export class PrismaTicketRepository implements TicketRepository {
 
       return TicketMapper.toDomain(updated);
     });
-  }}
+  }
+}

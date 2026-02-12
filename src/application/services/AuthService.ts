@@ -33,7 +33,6 @@ export class AuthService {
       throw new ApplicationError('Invalid refresh token', 401);
     }
 
-
     const user = await this.userRepo.findById(userId);
     if (!user || !user.active) {
       throw new ApplicationError('User not active', 401);

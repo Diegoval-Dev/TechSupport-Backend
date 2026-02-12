@@ -33,7 +33,13 @@ export class PrismaUserRepository implements UserRepository {
     return this.toDomain(dbUser);
   }
 
-  private toDomain(dbUser: { id: string; email: string; passwordHash: string; role: UserRole; active: boolean }): User {
+  private toDomain(dbUser: {
+    id: string;
+    email: string;
+    passwordHash: string;
+    role: UserRole;
+    active: boolean;
+  }): User {
     return new User({
       id: dbUser.id,
       email: dbUser.email,

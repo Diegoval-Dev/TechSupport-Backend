@@ -8,12 +8,9 @@ export class TokenService {
 
   async generateTokens(userId: string, role: UserRole) {
     const accessToken = signToken({ sub: userId, role });
-
     const refreshToken = randomBytes(32).toString('hex');
 
-
     await this.refreshRepo.save(userId, refreshToken);
-
     return { accessToken, refreshToken };
   }
 
@@ -26,10 +23,8 @@ export class TokenService {
   }
 
   async rotateRefreshToken(userId: string, oldToken: string, role: UserRole) {
-
     await this.refreshRepo.delete(userId, oldToken);
 
     return this.generateTokens(userId, role);
   }
 }
-

@@ -5,6 +5,10 @@ import { requireRole } from '../middlewares/role.middleware';
 import { UserRole } from '../../../domain/enums/UserRole';
 import { z } from 'zod';
 
+interface StatusParams {
+  processId: string;
+}
+
 const statusParamSchema = z.object({
   processId: z.string().uuid(),
 });
@@ -29,8 +33,11 @@ router.post(
   FileController.upload,
 );
 
-router.get('/status/:processId', validateStatusParam, (req: any, res: Response) =>
-  FileController.status(req, res),
+router.get(
+  '/status/:processId',
+  validateStatusParam,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (req: any, res: Response) => FileController.status(req as Request<StatusParams>, res),
 );
 
 export default router;

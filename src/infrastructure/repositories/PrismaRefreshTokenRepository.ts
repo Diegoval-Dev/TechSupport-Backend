@@ -4,9 +4,7 @@ import bcrypt from 'bcrypt';
 
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
   async save(userId: string, token: string): Promise<void> {
-
     const hashedToken = await bcrypt.hash(token, 10);
-    
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -21,7 +19,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 
   async exists(userId: string, token: string): Promise<boolean> {
     const now = new Date();
-    
+
     const tokens = await prisma.refreshToken.findMany({
       where: {
         userId,

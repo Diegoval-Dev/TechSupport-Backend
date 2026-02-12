@@ -33,9 +33,7 @@ export const startSlaScheduler = () => {
         const ticket = TicketMapper.toDomain(item);
         const beforeStatus = ticket.status;
 
-
         const slaResult = service.check(ticket, item.client.type);
-
 
         await eventQueue.add('process-sla-event', {
           ticketId: slaResult.ticketId,
@@ -45,7 +43,6 @@ export const startSlaScheduler = () => {
           slaHoursElapsed: slaResult.salaDifference,
         });
 
-
         if (ticket.status !== beforeStatus) {
           slaUpdates.push({
             id: ticket['props'].id,
@@ -54,7 +51,6 @@ export const startSlaScheduler = () => {
           });
         }
       }
-
 
       if (slaUpdates.length > 0) {
         for (const update of slaUpdates) {
