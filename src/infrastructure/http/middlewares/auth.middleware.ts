@@ -25,7 +25,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     next();
   } catch (error) {
     return res.status(401).json({
-      message: 'Unauthorized: invalid or expired token',
+      message: `Unauthorized: invalid or expired token, ${error instanceof Error ? error.message : 'Unknown error'}`,
     });
   }
 };

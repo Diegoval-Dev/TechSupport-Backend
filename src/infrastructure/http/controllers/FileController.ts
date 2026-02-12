@@ -27,11 +27,9 @@ export class FileController {
   static async status(req: Request<StatusParams>, res: Response) {
     try {
       const result = await service.getStatus(req.params.processId);
-      
       if (!result) {
         return res.status(404).json({ message: 'Process not found' });
       }
-      
       res.json(result);
     } catch (error) {
       return res.status(500).json({
