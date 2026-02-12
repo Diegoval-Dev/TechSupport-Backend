@@ -5,8 +5,10 @@ import { startTicketWorker } from './infrastructure/workers/ticketProcessor.work
 
 
 (async () => {
-    await connectMongo();
-    startTicketWorker();
+    if(process.env.NODE_ENV !== 'test') {
+        await connectMongo();
+        startTicketWorker();
+    }
 
     app.listen(env.port, () => {
         console.log(`Server running on port ${env.port}`);

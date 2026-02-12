@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "generate:excel": "ts-node scripts/generate-excel.ts",
-    "test": "jest"
+    "test": "cross-env NODE_ENV=test jest"
   },
   "repository": {
     "type": "git",
@@ -56,7 +56,8 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^25.2.3",
     "@types/supertest": "^6.0.3",
-    "eslint": "^10.0.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.2.0",
