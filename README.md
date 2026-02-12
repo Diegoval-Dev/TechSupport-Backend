@@ -52,8 +52,8 @@ This table reflects the current codebase and is intentionally honest.
 | Metrics endpoint and HTTP metrics                | Complete | [src/infrastructure/observability/metrics.ts](src/infrastructure/observability/metrics.ts)                                                                                           |
 | Async Excel processing with retries and DLQ      | Complete | [src/infrastructure/queue](src/infrastructure/queue), [src/infrastructure/workers/ticketProcessor.worker.ts](src/infrastructure/workers/ticketProcessor.worker.ts)                   |
 | Reports from MongoDB                             | Complete | [src/application/services/ReportService.ts](src/application/services/ReportService.ts)                                                                                               |
-| Ticket CRUD and SLA logic                        | Partial  | Create, list with filters and pagination, soft delete, status change, and assignment are implemented; SLA scheduler runs in-process                                                  |
-| Auth endpoints and roles                         | Partial  | Login/refresh/logout/register implemented; user management is still in-memory                                                                                                        |
+| Ticket CRUD and SLA logic                        | Complete | CRUD with soft delete, transactional status/assignment, SLA checking with event-driven architecture ([PrismaTicketRepository.ts](src/infrastructure/repositories/PrismaTicketRepository.ts), [SLAService.ts](src/application/services/SLAService.ts)) |
+| Auth endpoints and roles                         | Complete | Login/refresh/logout/register with persistent user storage, bcrypt hashing, 7-day refresh token rotation, role-based access control ([PrismaUserRepository.ts](src/infrastructure/repositories/PrismaUserRepository.ts), [TokenService.ts](src/application/services/TokenService.ts)) |
 | ADRs documented                                  | Complete | [docs/adr](docs/adr)                                                                                                                                                                 |
 
 ## Tech stack
@@ -81,11 +81,12 @@ MongoDB:
 - Security headers via helmet
 - Zod validation for auth and ticket endpoints
 - Centralized error handling with typed errors
-
-Not implemented yet:
-
-- Request timeout middleware (package is installed but not wired)
-- SQL injection protection is provided by Prisma, but validation is still needed
+- 30-second request timeout on all endpoints
+- JSON structured logging for all HTTP requests
+- Transactional locks on concurrent state changes (Prisma $transaction)
+- Event-driven SLA architecture with async processing (BullMQ queue + workers)
+- Persistent authentication with secure refresh tokens (bcrypt hashing, 7-day expiry)
+- Role-based access control (ADMIN, SUPERVISOR, AGENTE) on all sensitive endpoints
 
 ## API endpoints
 
