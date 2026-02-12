@@ -1,4 +1,4 @@
-import { UserRepository } from '../../application/ports/UserRepository';
+import { CreateUserData, UserRepository } from '../../application/ports/UserRepository';
 import { User } from '../../domain/entities/User';
 import { UserRole } from '../../domain/enums/UserRole';
 import bcrypt from 'bcrypt';
@@ -16,5 +16,19 @@ export class InMemoryUserRepository implements UserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.users.find((u) => u.email === email) ?? null;
+  }
+
+  async create(data: CreateUserData): Promise<User> {
+    const user = new User({
+      id: crypto.randomUUID(),
+      email: data.email,
+      passwordHash: data.passwordHash,
+      role: data.role,
+      active: data.active,
+    });
+
+    this.users.push(user);
+
+    return user;
   }
 }

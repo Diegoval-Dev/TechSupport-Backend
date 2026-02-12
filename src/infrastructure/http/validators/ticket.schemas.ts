@@ -29,3 +29,24 @@ export const assignAgentSchema = z.object({
   agentId: z.string().uuid(),
   agentLevel: z.coerce.number().int().min(1),
 });
+
+export const ticketResponseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  status: z.nativeEnum(TicketStatus),
+  priority: z.number().int(),
+  clientId: z.string().uuid(),
+  agentId: z.string().uuid().nullable(),
+  escalationLevel: z.number().int(),
+  createdAt: z.string().datetime(),
+  resolvedAt: z.string().datetime().nullable(),
+  resolutionTimeMin: z.number().nullable(),
+});
+
+export const listTicketsResponseSchema = z.object({
+  data: z.array(ticketResponseSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+});

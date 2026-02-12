@@ -3,6 +3,7 @@ import { comparePassword } from '../../infrastructure/auth/password';
 import { ApplicationError } from '../errors/ApplicationError';
 import { TokenService } from './TokenService';
 import { UserRole } from '../../domain/enums/UserRole';
+import bcrypt from 'bcrypt';
 
 export class AuthService {
   constructor(
@@ -37,5 +38,20 @@ export class AuthService {
 
   async logout(userId: string, refreshToken: string) {
     await this.tokenService.revokeRefreshToken(userId, refreshToken);
+  }
+
+  async register(email: string, password: string, role: UserRole, active = true) {
+    const existing = await this.userRepo.findByEmail(email);
+    if (existing) {
+      throw new ApplicationError('Email already in use', 409);
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    return this.userRepo.create({
+      email,
+      passwordHash,
+      role,
+      active,
+    });
   }
 }

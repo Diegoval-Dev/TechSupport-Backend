@@ -46,8 +46,8 @@ This table reflects the current codebase and is intentionally honest.
 | Metrics endpoint and HTTP metrics | Complete | [src/infrastructure/observability/metrics.ts](src/infrastructure/observability/metrics.ts) |
 | Async Excel processing with retries and DLQ | Complete | [src/infrastructure/queue](src/infrastructure/queue), [src/infrastructure/workers/ticketProcessor.worker.ts](src/infrastructure/workers/ticketProcessor.worker.ts) |
 | Reports from MongoDB | Complete | [src/application/services/ReportService.ts](src/application/services/ReportService.ts) |
-| Ticket CRUD and SLA logic | Partial | Create, list with filters and pagination, soft delete, status change, and assignment are implemented; SLA scheduler is incomplete |
-| Auth endpoints and roles | Partial | Login/refresh/logout are implemented; user management is in-memory |
+| Ticket CRUD and SLA logic | Partial | Create, list with filters and pagination, soft delete, status change, and assignment are implemented; SLA scheduler runs in-process |
+| Auth endpoints and roles | Partial | Login/refresh/logout/register implemented; user management is still in-memory |
 | ADRs documented | Complete | [docs/adr](docs/adr) |
 
 ## Tech stack
@@ -85,6 +85,7 @@ Health and metrics:
 
 Auth:
 - `POST /api/auth/login`
+- `POST /api/auth/register` (admin only)
 - `POST /api/auth/refresh`
 - `POST /api/auth/logout`
 
@@ -185,7 +186,4 @@ npm run generate:excel
 
 `npm run generate:excel` creates a sample `tickets_5000.xlsx` file.
 
-## Limitations and next steps
-- Status transitions and SLA checks are not scheduled as background jobs
-- No user management endpoints (admin create user) are exposed
-- ADRs exist but are not referenced in detail in this README
+
