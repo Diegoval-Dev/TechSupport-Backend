@@ -3,13 +3,16 @@ services:
     build: .
     container_name: techsupport-api
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
-      - mongo
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongo:
+        condition: service_started
 
   postgres:
     image: postgres:16
@@ -19,21 +22,26 @@ services:
       POSTGRES_PASSWORD: techsupport
       POSTGRES_DB: techsupport
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U techsupport']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
     container_name: techsupport-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
   mongo:
     image: mongo:7
     container_name: techsupport-mongo
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongo-data:/data/db
 

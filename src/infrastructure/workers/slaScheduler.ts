@@ -8,8 +8,7 @@ const DEFAULT_INTERVAL_MS = 60 * 1000;
 
 export const startSlaScheduler = () => {
   const service = new SLAService();
-  const intervalMs =
-    Number(process.env.SLA_SCHEDULER_INTERVAL_MS) || DEFAULT_INTERVAL_MS;
+  const intervalMs = Number(process.env.SLA_SCHEDULER_INTERVAL_MS) || DEFAULT_INTERVAL_MS;
 
   const run = async () => {
     try {

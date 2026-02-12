@@ -1,9 +1,11 @@
 # ADR 002: Use BullMQ for Asynchronous Excel Processing
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-02-10
 
 ## Context
@@ -38,18 +40,24 @@ Queue initialization uses lazy loading to avoid unwanted connections during test
 ## Alternatives Considered
 
 ### 1. Bull (legacy version)
+
 Rejected:
+
 - BullMQ is the maintained successor
 - Better TypeScript support
 
 ### 2. Node.js worker threads
+
 Rejected:
+
 - No persistence
 - No retry or backoff built-in
 - Complex error handling
 
 ### 3. RabbitMQ / Kafka
+
 Rejected:
+
 - Overkill for scope
 - Higher operational complexity
 - Requires additional infrastructure management
@@ -57,6 +65,7 @@ Rejected:
 ## Consequences
 
 ### Positive
+
 - Built-in retry logic
 - Concurrency control
 - Production-grade durability
@@ -64,6 +73,7 @@ Rejected:
 - Redis already required for rate limiting
 
 ### Negative
+
 - Requires Redis availability
 - Additional complexity in testing (handled via environment isolation)
 

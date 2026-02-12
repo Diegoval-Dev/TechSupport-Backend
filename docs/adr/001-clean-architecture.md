@@ -1,9 +1,11 @@
 # ADR 001: Adoption of Clean Architecture
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-02-10
 
 ## Context
@@ -51,25 +53,31 @@ No domain object depends on Express, Prisma, Mongoose, BullMQ, or Redis.
 ## Alternatives Considered
 
 ### 1. Layered MVC (Controller → Service → Repository)
+
 Rejected because:
+
 - Tends to leak infrastructure into services
 - Weak domain isolation
 - Harder to scale with asynchronous processing
 
 ### 2. Feature-based modular architecture
+
 Rejected because:
+
 - Risk of cross-cutting coupling
 - Harder to maintain strict domain boundaries
 
 ## Consequences
 
 ### Positive
+
 - Business logic is isolated and testable
 - Infrastructure can be replaced (e.g., Prisma → TypeORM)
 - Clear mental model of responsibilities
 - Easier to introduce CQRS patterns for reporting
 
 ### Negative
+
 - More initial boilerplate
 - Slightly higher learning curve
 - Requires discipline to maintain boundaries

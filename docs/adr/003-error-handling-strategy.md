@@ -1,9 +1,11 @@
 # ADR 003: Centralized Error Handling Strategy
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-02-10
 
 ## Context
@@ -50,13 +52,17 @@ Operational vs unexpected errors are distinguished.
 ## Alternatives Considered
 
 ### 1. Throwing generic Error everywhere
+
 Rejected:
+
 - No status control
 - No structured classification
 - Poor observability
 
 ### 2. Returning Result objects instead of throwing
+
 Rejected:
+
 - Adds verbosity
 - Increases cognitive load
 - Less idiomatic in Express ecosystem
@@ -64,6 +70,7 @@ Rejected:
 ## Consequences
 
 ### Positive
+
 - Clean separation of concerns
 - Consistent HTTP responses
 - Centralized logging
@@ -71,6 +78,7 @@ Rejected:
 - Easier monitoring integration
 
 ### Negative
+
 - Requires discipline to avoid throwing raw errors
 - Slightly more boilerplate
 

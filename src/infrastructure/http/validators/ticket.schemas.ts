@@ -18,11 +18,7 @@ export const listTicketsSchema = z.object({
 });
 
 export const updateStatusSchema = z.object({
-  status: z.enum([
-    TicketStatus.IN_PROGRESS,
-    TicketStatus.RESOLVED,
-    TicketStatus.ESCALATED,
-  ]),
+  status: z.enum([TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.ESCALATED]),
 });
 
 export const assignAgentSchema = z.object({

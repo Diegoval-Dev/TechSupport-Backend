@@ -16,8 +16,9 @@ interface DeleteTicketParams {
 
 const service = new TicketService(new PrismaTicketRepository());
 
-const serializeTicket = (ticket: { [key: string]: any }) => {
-  const props = ticket['props'];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const serializeTicket = (ticket: any) => {
+  const props = ticket.props;
 
   return {
     id: props.id,
@@ -46,7 +47,6 @@ export class TicketController {
     const data = listTicketsSchema.parse(req.query);
     const normalizedPage = data.page ?? 1;
     const normalizedPageSize = data.pageSize ?? 20;
-
     const result = await service.list({
       status: data.status,
       priority: data.priority,
