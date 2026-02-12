@@ -37,14 +37,16 @@ export const startTicketWorker = () => {
 
         return true;
       } catch (error) {
-        logger.error({ error }, 'Job failed');
+        logger.error({ error, processId }, 'Job failed');
 
         await FileProcess.updateOne(
           { processId },
           { $inc: { failed: 1 } },
         );
 
-        if (job.attemptsMade + 1 >= job.opts.attempts!) {
+        const maxAttempts = job.opts.attempts ?? 1;
+
+        if (job.attemptsMade + 1 >= maxAttempts) {
           await deadLetterQueue.add('failed-ticket', job.data);
         }
 
@@ -75,7 +77,14 @@ export const startTicketWorker = () => {
   });
 
   worker.on('failed', async (job, err) => {
-    logger.error({ err }, 'Worker job failed permanently');
+    logger.error(
+      { err, jobId: job?.id },
+      'Worker job failed permanently',
+    );
+  });
+
+  worker.on('error', (err) => {
+    logger.fatal({ err }, 'Worker crashed');
   });
 
   return worker;
