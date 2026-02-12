@@ -1,5 +1,5 @@
 import { prisma } from '../database/prisma';
-import { TicketRepository } from '../../application/ports/TicketRepository';
+import { TicketFilters, TicketRepository } from '../../application/ports/TicketRepository';
 import { Ticket } from '../../domain/entities/Ticket';
 import { TicketStatus } from '../../domain/enums/TicketStatus';
 import { TicketMapper } from '../mappers/TicketMapper';
@@ -27,24 +27,75 @@ export class PrismaTicketRepository implements TicketRepository {
     return ticket ? TicketMapper.toDomain(ticket) : null;
   }
 
-  async findAll() {
+  async findAll(filters: TicketFilters) {
+    const page = filters.page ?? 1;
+    const pageSize = filters.pageSize ?? 20;
+    const skip = (page - 1) * pageSize;
+
+    const createdAt =
+      filters.from || filters.to
+        ? {
+            gte: filters.from,
+            lte: filters.to,
+          }
+        : undefined;
+
+    const where = {
+      deletedAt: null,
+      status: filters.status,
+      priority: filters.priority,
+      clientId: filters.clientId,
+      createdAt,
+    };
+
     const [data, total] = await Promise.all([
-      prisma.ticket.findMany({ where: { deletedAt: null } }),
-      prisma.ticket.count({ where: { deletedAt: null } }),
+      prisma.ticket.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      prisma.ticket.count({ where }),
     ]);
 
     return {
       data: data.map(TicketMapper.toDomain),
       total,
+      page,
+      pageSize,
     };
   }
 
   async update(ticket: Ticket) {
+    const data: {
+      status: TicketStatus;
+      agentId?: string | null;
+      escalationLevel?: number;
+      resolvedAt?: Date | null;
+      resolutionTimeMin?: number | null;
+    } = {
+      status: ticket.status,
+    };
+
+    if (ticket['props'].agentId !== undefined) {
+      data.agentId = ticket['props'].agentId;
+    }
+
+    if (ticket['props'].escalationLevel !== undefined) {
+      data.escalationLevel = ticket['props'].escalationLevel;
+    }
+
+    if (ticket['props'].resolvedAt !== undefined) {
+      data.resolvedAt = ticket['props'].resolvedAt ?? null;
+    }
+
+    if (ticket['props'].resolutionTimeMin !== undefined) {
+      data.resolutionTimeMin = ticket['props'].resolutionTimeMin ?? null;
+    }
+
     const updated = await prisma.ticket.update({
       where: { id: ticket['props'].id },
-      data: {
-        status: ticket.status,
-      },
+      data,
     });
 
     return TicketMapper.toDomain(updated);

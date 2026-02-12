@@ -1,4 +1,4 @@
-import { TicketRepository } from '../ports/TicketRepository';
+import { TicketFilters, TicketRepository } from '../ports/TicketRepository';
 import { Ticket } from '../../domain/entities/Ticket';
 import { TicketStatus } from '../../domain/enums/TicketStatus';
 import { ApplicationError } from '../errors/ApplicationError';
@@ -6,7 +6,7 @@ import { ApplicationError } from '../errors/ApplicationError';
 interface CreateTicketData {
   title: string;
   description: string;
-  userId: string;
+  clientId: string;
 }
 
 export class TicketService {
@@ -15,19 +15,20 @@ export class TicketService {
   async create(data: CreateTicketData) {
     const ticket = new Ticket({
       id: crypto.randomUUID(),
-      ...data,
+      title: data.title,
+      description: data.description,
       status: TicketStatus.OPEN,
       escalationLevel: 0,
       createdAt: new Date(),
       priority: 2,
-      clientId: '',
+      clientId: data.clientId,
     });
 
     return this.repo.create(ticket);
   }
 
-  async list() {
-    return this.repo.findAll({});
+  async list(filters: TicketFilters) {
+    return this.repo.findAll(filters);
   }
 
   async delete(id: string) {
