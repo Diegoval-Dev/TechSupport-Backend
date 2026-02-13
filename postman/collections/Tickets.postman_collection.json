@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "e827368f-837c-43d8-84bf-e8e9598183f3",
+    "name": "Tickets",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Ticket",
+      "id": "a1f745ef-a85e-4c88-a8ab-dc0281d8cc96",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Printer not working\",\n  \"description\": \"The printer is offline\",\n  \"priority\": 1,\n  \"clientId\": \"666a6bf1-a821-446e-a187-44a75cbf563a\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tickets",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tickets"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Tickets",
+      "id": "ff90831c-9efc-461b-b42a-80d0f3dee9fc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tickets",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tickets"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Change Status",
+      "id": "81e8756d-483e-4b0c-a618-7fbc00be6283",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tickets/:id/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tickets",
+            ":id",
+            "status"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "8c1bf73b-7441-4904-984e-11ce905bd23c"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Soft Delete",
+      "id": "eebc17d1-4267-4614-b370-180ca48e6809",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tickets",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "8c1bf73b-7441-4904-984e-11ce905bd23c"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "70273fe5-ffdd-433a-98ba-ee73173fe44e",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "46626de7-a1c8-4b76-9c59-763dc5cb7ed1",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.environment.get(\"token\")) {",
+          "    pm.request.headers.add({",
+          "        key: \"Authorization\",",
+          "        value: \"Bearer \" + pm.environment.get(\"token\")",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

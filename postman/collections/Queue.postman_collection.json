@@ -1,0 +1,90 @@
+{
+  "info": {
+    "_postman_id": "edd58384-7983-4497-bb99-8f23dde5af95",
+    "name": "Queue",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Queue Stats",
+      "id": "ca076a24-8c9a-40dd-a8e5-457fa51a9274",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/queue/stats",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "queue",
+            "stats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dead Letter Queue",
+      "id": "804e8b6a-cfb9-4c4b-99bb-f9829a08fb1c",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/queue/dlq",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "queue",
+            "dlq"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "0f4e372a-6d95-4d0f-9193-fc624549ec38",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "2bd07f7e-8dd4-42e8-a5b1-be0d1ad12d07",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.environment.get(\"token\")) {",
+          "    pm.request.headers.add({",
+          "        key: \"Authorization\",",
+          "        value: \"Bearer \" + pm.environment.get(\"token\")",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

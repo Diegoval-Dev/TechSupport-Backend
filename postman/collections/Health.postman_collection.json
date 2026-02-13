@@ -1,0 +1,60 @@
+{
+  "info": {
+    "_postman_id": "fc52d481-6e89-4dc1-88c7-be8110d7505d",
+    "name": "Health",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "health",
+      "id": "c59ff9a4-a5a8-4cd0-ae09-054173ea26c7",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "c129c348-e4ed-4955-bbb5-73de5c734b8d",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "b2765aa7-8131-4943-abb5-4586f32aae89",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.environment.get(\"token\")) {",
+          "    pm.request.headers.add({",
+          "        key: \"Authorization\",",
+          "        value: \"Bearer \" + pm.environment.get(\"token\")",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

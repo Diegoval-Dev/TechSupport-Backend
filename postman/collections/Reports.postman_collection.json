@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "432ae36f-7617-4b8f-b0d3-c27d4eba07df",
+    "name": "Reports",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Avg Resolution",
+      "id": "fa8f97bc-3189-4a00-91db-44fce5dcb9ed",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/reports/avg-resolution",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reports",
+            "avg-resolution"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Escalated Per Month",
+      "id": "a6204050-8266-4eba-a4eb-ffef34bbb719",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/reports/escalated-per-month",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reports",
+            "escalated-per-month"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Top Agents",
+      "id": "b978c563-80db-4c6d-8495-9eb18b1c32f1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/reports/top-agents",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reports",
+            "top-agents"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Weekly Status",
+      "id": "9fd5a0a3-4e28-48b5-a54f-5d72283ee9a5",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/reports/weekly-status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reports",
+            "weekly-status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Last Processes",
+      "id": "ecc53209-9ee4-4cc6-83a0-fcdee700f956",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/reports/last-processes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reports",
+            "last-processes"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "9e350812-c6cb-40e5-b5d1-1163012416c5",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "ca75b4e3-9ad3-448f-b9e2-4103543ca48c",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.environment.get(\"token\")) {",
+          "    pm.request.headers.add({",
+          "        key: \"Authorization\",",
+          "        value: \"Bearer \" + pm.environment.get(\"token\")",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

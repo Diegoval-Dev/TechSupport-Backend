@@ -1,0 +1,104 @@
+{
+  "info": {
+    "_postman_id": "2ff175fe-d4a1-43c2-8851-c600fc1cc55a",
+    "name": "File Processing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Status",
+      "id": "34c3fdd3-ae8b-43a0-bcd3-7f3768d670c1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/files/status/{{processId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "files",
+            "status",
+            "{{processId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "FILE PROCESSING",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "50a128b5-f1b3-4e66-9bca-557e0af68f53",
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.environment.set(\"processId\", json.processId);ß"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "id": "07cfd34b-7d3d-4871-98a4-71f0c7fb5899",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "/Users/diego/Cosas/VC-PruebaTecnica/tickets_5000.xlsx"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/files/upload",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "files",
+            "upload"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "fe55127c-928d-449b-bb5e-02fb4db4fcab",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.environment.get(\"token\")) {",
+          "    pm.request.headers.add({",
+          "        key: \"Authorization\",",
+          "        value: \"Bearer \" + pm.environment.get(\"token\")",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "8d6ca5b9-ba58-4e13-b481-916560839208",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
