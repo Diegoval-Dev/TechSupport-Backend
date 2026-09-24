@@ -1,4 +1,8 @@
-import { CreateUserData, UserRepository } from '../../application/ports/UserRepository';
+import {
+  CreateUserData,
+  UserFilters,
+  UserRepository,
+} from '../../application/ports/UserRepository';
 import { User } from '../../domain/entities/User';
 import { UserRole } from '../../domain/enums/UserRole';
 import bcrypt from 'bcrypt';
@@ -34,5 +38,18 @@ export class InMemoryUserRepository implements UserRepository {
     this.users.push(user);
 
     return user;
+  }
+
+  async findAll(filters: UserFilters) {
+    const page = filters.page ?? 1;
+    const pageSize = filters.pageSize ?? 20;
+    const start = (page - 1) * pageSize;
+
+    return {
+      data: this.users.slice(start, start + pageSize),
+      total: this.users.length,
+      page,
+      pageSize,
+    };
   }
 }

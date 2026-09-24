@@ -59,4 +59,8 @@ export class AuthService {
       active,
     });
   }
+
+  async listUsers(filters: { page?: number; pageSize?: number }) {
+    return this.userRepo.findAll(filters);
+  }
 }

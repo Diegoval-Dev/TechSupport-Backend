@@ -8,6 +8,7 @@ const router = Router();
 
 router.post('/login', AuthController.login);
 router.post('/register', authMiddleware, requireRole([UserRole.ADMIN]), AuthController.register);
+router.get('/users', authMiddleware, requireRole([UserRole.ADMIN]), AuthController.listUsers);
 router.post('/refresh', authMiddleware, AuthController.refresh);
 router.post('/logout', authMiddleware, AuthController.logout);
 
