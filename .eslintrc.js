@@ -9,5 +9,5 @@ module.exports = {
     'prettier/prettier': 'error',
     '@typescript-eslint/no-unused-vars': ['error'],
   },
-  ignorePatterns: ['jest.config.js', '.eslintrc.js', 'prisma/**', 'scripts/**', 'tests/**'],
+  ignorePatterns: ['jest.config.js', '.eslintrc.js', 'prisma/**', 'scripts/**', 'tests/**', 'frontend/**'],
 };
