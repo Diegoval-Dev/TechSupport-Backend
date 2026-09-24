@@ -4,7 +4,12 @@ import { AuthService } from '../../../application/services/AuthService';
 import { PrismaUserRepository } from '../../repositories/PrismaUserRepository';
 import { PrismaRefreshTokenRepository } from '../../repositories/PrismaRefreshTokenRepository';
 import { TokenService } from '../../../application/services/TokenService';
-import { loginSchema, refreshSchema, registerSchema } from '../validators/auth.schemas';
+import {
+  listUsersSchema,
+  loginSchema,
+  refreshSchema,
+  registerSchema,
+} from '../validators/auth.schemas';
 
 const userRepo = new PrismaUserRepository();
 const refreshRepo = new PrismaRefreshTokenRepository();
@@ -32,6 +37,32 @@ export class AuthController {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           message: 'Invalid request body',
+          error: error.message,
+        });
+      }
+      throw error;
+    }
+  }
+
+  static async listUsers(req: Request, res: Response) {
+    try {
+      const data = listUsersSchema.parse(req.query);
+      const result = await authService.listUsers(data);
+      res.json({
+        data: result.data.map((user) => ({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          active: user.active,
+        })),
+        total: result.total,
+        page: result.page,
+        pageSize: result.pageSize,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
           error: error.message,
         });
       }

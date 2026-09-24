@@ -13,6 +13,10 @@ The company serves two client tiers:
 
 In addition, the company needs to process large historical Excel files to generate performance reports.
 
+## Frontend
+
+A full multi-user React + TypeScript SPA lives in [frontend](frontend), with JWT auth, role-based navigation (ADMIN/SUPERVISOR/AGENTE), and screens for tickets, reports, file imports, the processing queue, and user management. See [frontend/README.md](frontend/README.md) for setup.
+
 ## Architecture
 
 Clean Architecture with explicit boundaries:
@@ -151,6 +155,7 @@ Auth:
 
 - `POST /api/auth/login` - Returns access token and refresh token
 - `POST /api/auth/register` (admin only) - Create new user
+- `GET /api/auth/users` (admin only) - List users, paginated
 - `POST /api/auth/refresh` - Renew access token using refresh token
 - `POST /api/auth/logout` - Revoke refresh token
 
@@ -171,7 +176,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
-The access token expires in 1 hour. Use the refresh token to get a new access token (valid for 7 days).
+The access token expires in 15 minutes. Use the refresh token to get a new token pair (refresh token valid for 7 days). Note: `/api/auth/refresh` requires the current (still valid) access token in the `Authorization` header, so clients should renew proactively before expiry rather than waiting for a 401.
 
 Tickets:
 
@@ -190,6 +195,11 @@ Ticket list filters:
 - `to`: ISO date
 - `page`: number (default 1)
 - `pageSize`: number (default 20, max 100)
+
+Clients and Agents (read-only, used to populate ticket forms):
+
+- `GET /api/clients?search=&page=&pageSize=`
+- `GET /api/agents?search=&active=&page=&pageSize=`
 
 Files:
 
