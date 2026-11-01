@@ -1,27 +1,40 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../logger/logger';
 
+const SERVER_ERROR_STATUS = 500;
+const CLIENT_ERROR_STATUS = 400;
+
+const levelForStatus = (status: number) => {
+  if (status >= SERVER_ERROR_STATUS) return 'error';
+  if (status >= CLIENT_ERROR_STATUS) return 'warn';
+  return 'info';
+};
+
 export const httpLoggingMiddleware = (
   req: Request & { user?: { sub: string; role?: string } },
   res: Response,
   next: NextFunction,
 ) => {
-  const start = Date.now();
+  const start = process.hrtime.bigint();
+  const urlPath = req.originalUrl.split('?')[0];
 
   res.on('finish', () => {
-    const duration = Date.now() - start;
+    const durationNs = Number(process.hrtime.bigint() - start);
+    const status = res.statusCode;
 
-    logger.info(
+    logger[levelForStatus(status)](
       {
-        type: 'http_request',
-        method: req.method,
-        path: req.path,
-        status: res.statusCode,
-        duration_ms: duration,
-        userId: req.user?.sub,
-        userRole: req.user?.role,
+        event: { category: 'web', action: 'http_request', duration: durationNs },
+        http: {
+          request: { method: req.method },
+          response: { status_code: status },
+        },
+        url: { path: urlPath },
+        user: { id: req.user?.sub, roles: req.user?.role ? [req.user.role] : undefined },
+        client: { ip: req.ip },
+        route: req.route?.path,
       },
-      `${req.method} ${req.path} ${res.statusCode}`,
+      `${req.method} ${urlPath} ${status}`,
     );
   });
 

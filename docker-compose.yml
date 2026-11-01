@@ -6,6 +6,10 @@ services:
       - '3000:3000'
     env_file:
       - .env
+    environment:
+      LOG_FILE_PATH: /app/logs/app.log
+    volumes:
+      - ./logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +49,81 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION:-8.15.3}
+    container_name: techsupport-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: 'false'
+      xpack.license.self_generated.type: basic
+      cluster.routing.allocation.disk.threshold_enabled: 'false'
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - '9200:9200'
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:9200/_cluster/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELK_VERSION:-8.15.3}
+    container_name: techsupport-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - '5601:5601'
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:5601/api/status | grep -q "\"level\":\"available\"" || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  elk-setup:
+    image: curlimages/curl:8.10.1
+    container_name: techsupport-elk-setup
+    restart: 'no'
+    volumes:
+      - ./elk/kibana:/setup:ro
+    entrypoint: ['sh', '/setup/setup.sh']
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      KIBANA_URL: http://kibana:5601
+    depends_on:
+      kibana:
+        condition: service_healthy
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${ELK_VERSION:-8.15.3}
+    container_name: techsupport-filebeat
+    user: root
+    command: ['filebeat', '-e', '--strict.perms=false']
+    volumes:
+      - ./elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/var/log/techsupport:ro
+      - filebeat-data:/usr/share/filebeat/data
+    depends_on:
+      elk-setup:
+        condition: service_completed_successfully
+
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:${ELK_VERSION:-8.15.3}
+    container_name: techsupport-heartbeat
+    user: root
+    command: ['heartbeat', '-e', '--strict.perms=false']
+    volumes:
+      - ./elk/heartbeat/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+    depends_on:
+      elk-setup:
+        condition: service_completed_successfully
+
 volumes:
   postgres-data:
   mongo-data:
+  elasticsearch-data:
+  filebeat-data:

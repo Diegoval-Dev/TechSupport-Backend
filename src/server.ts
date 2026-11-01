@@ -1,3 +1,4 @@
+import './infrastructure/observability/tracingBootstrap';
 import 'dotenv/config';
 
 import { app } from './app';
@@ -8,6 +9,7 @@ import { startSlaScheduler } from './infrastructure/workers/slaScheduler';
 import { startSlaEventWorker } from './infrastructure/workers/slaEventWorker';
 import { prisma } from './infrastructure/database/prisma';
 import bcrypt from 'bcrypt';
+import { logger } from './infrastructure/logger/logger';
 
 const ensureAdminUser = async () => {
   const adminEmail = 'admin@techsupport.pro';
@@ -31,7 +33,7 @@ const ensureAdminUser = async () => {
     },
   });
 
-  console.log('Created default admin user');
+  logger.info('Created default admin user');
 };
 
 (async () => {
@@ -44,6 +46,6 @@ const ensureAdminUser = async () => {
   }
 
   app.listen(env.port, () => {
-    console.log(`Server running on port ${env.port}`);
+    logger.info(`Server running on port ${env.port}`);
   });
 })();

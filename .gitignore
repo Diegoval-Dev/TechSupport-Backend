@@ -40,3 +40,6 @@ Thumbs.db
 # =========================
 docker-data/
 /src/generated/prisma
+
+# Sample log kept in version control (deliverable)
+!elk/sample/*.log

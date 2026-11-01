@@ -17,5 +17,18 @@ export const httpRequestDuration = new client.Histogram({
   buckets: [0.1, 0.3, 0.5, 1, 2, 5],
 });
 
+export const httpRequestsInFlight = new client.Gauge({
+  name: 'http_requests_in_flight',
+  help: 'HTTP requests currently being processed',
+});
+
+export const httpErrorCounter = new client.Counter({
+  name: 'http_errors_total',
+  help: 'HTTP responses with status >= 500',
+  labelNames: ['method', 'route'],
+});
+
 register.registerMetric(httpRequestCounter);
 register.registerMetric(httpRequestDuration);
+register.registerMetric(httpRequestsInFlight);
+register.registerMetric(httpErrorCounter);
