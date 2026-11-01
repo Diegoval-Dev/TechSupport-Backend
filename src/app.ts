@@ -9,18 +9,21 @@ import { metricsMiddleware } from './infrastructure/http/middlewares/metrics.mid
 import { httpLoggingMiddleware } from './infrastructure/http/middlewares/httpLogging.middleware';
 import { register } from './infrastructure/observability/metrics';
 
+const MONITORING_PATHS = ['/health', '/metrics'];
+
 export const app = express();
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
+  skip: (req) => MONITORING_PATHS.some((path) => req.path.startsWith(path)),
 });
 
-app.use(limiter);
+app.use(httpLoggingMiddleware);
 app.use(metricsMiddleware);
+app.use(limiter);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(httpLoggingMiddleware);
 
 app.use((req: Request, res: Response, next: (err?: unknown) => void) => {
   req.setTimeout(30000, () => {

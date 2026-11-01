@@ -1,0 +1,59 @@
+heartbeat.monitors:
+  - type: http
+    id: api-health
+    name: API health
+    schedule: '@every 10s'
+    urls: ['http://api:3000/health']
+    check.response.status: [200]
+    timeout: 5s
+
+  - type: http
+    id: api-health-details
+    name: API health details
+    schedule: '@every 30s'
+    urls: ['http://api:3000/health/metrics']
+    check.response.status: [200]
+    timeout: 5s
+
+  - type: http
+    id: api-prometheus-metrics
+    name: API metrics endpoint
+    schedule: '@every 30s'
+    urls: ['http://api:3000/metrics']
+    check.response.status: [200]
+    timeout: 5s
+
+  - type: http
+    id: api-auth-login
+    name: API auth endpoint
+    schedule: '@every 30s'
+    urls: ['http://api:3000/api/auth/login']
+    check.request.method: POST
+    check.request.headers:
+      Content-Type: application/json
+    check.request.body: '{}'
+    check.response.status: [400, 401, 422]
+    timeout: 5s
+
+  - type: tcp
+    id: postgres
+    name: PostgreSQL
+    schedule: '@every 30s'
+    hosts: ['postgres:5432']
+
+  - type: tcp
+    id: redis
+    name: Redis
+    schedule: '@every 30s'
+    hosts: ['redis:6379']
+
+  - type: tcp
+    id: mongo
+    name: MongoDB
+    schedule: '@every 30s'
+    hosts: ['mongo:27017']
+
+output.elasticsearch:
+  hosts: ['http://elasticsearch:9200']
+
+logging.level: info

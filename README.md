@@ -524,3 +524,19 @@ src/
 ├── infrastructure/  # External adapters (DB, queue, HTTP)
 └── shared/          # Cross-cutting concerns
 ```
+
+## Monitoring (ELK)
+
+Logs, metrics and traces for the API, visualised in Kibana.
+
+- Logs: ECS-formatted JSON (pino) written to stdout and `logs/app.log`. Fields include `@timestamp`, `http.request.method`, `http.response.status_code`, `event.duration` (ns), `url.path`, `service.name`, `log.level`, plus `trace.id` / `span.id`. Sample: [elk/sample/api-sample.log](elk/sample/api-sample.log).
+- Metrics: Prometheus at `GET /metrics` (request count, duration histogram, in-flight requests, 5xx counter).
+- Traces: OpenTelemetry (HTTP, Express, pg, ioredis). Trace ids are correlated into logs. Set `OTEL_EXPORTER_OTLP_ENDPOINT` to export spans to a collector or APM server.
+- Pipeline: API → `logs/` → Filebeat → Elasticsearch → Kibana. Heartbeat probes the API and databases ([elk/heartbeat/heartbeat.yml](elk/heartbeat/heartbeat.yml)).
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+Open Kibana at http://localhost:5601 and the dashboard "TechSupport Pro - Monitoring" (imported automatically by the `elk-setup` service from [elk/kibana/dashboard.ndjson](elk/kibana/dashboard.ndjson)). Elasticsearch security is disabled for local use only.
