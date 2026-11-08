@@ -30,6 +30,7 @@ export const httpLoggingMiddleware = (
           response: { status_code: status },
         },
         url: { path: urlPath },
+        user_agent: { original: req.get('user-agent') },
         user: { id: req.user?.sub, roles: req.user?.role ? [req.user.role] : undefined },
         client: { ip: req.ip },
         route: req.route?.path,

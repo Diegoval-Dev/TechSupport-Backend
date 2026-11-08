@@ -10,11 +10,16 @@ import { httpLoggingMiddleware } from './infrastructure/http/middlewares/httpLog
 import { register } from './infrastructure/observability/metrics';
 
 const MONITORING_PATHS = ['/health', '/metrics'];
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const DEFAULT_RATE_LIMIT_MAX = 100;
 
 export const app = express();
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: Number(process.env.RATE_LIMIT_MAX) || DEFAULT_RATE_LIMIT_MAX,
+  // IPv4 clients arrive as IPv4-mapped IPv6 (::ffff:a.b.c.d); the default /56 mask
+  // would put every one of them under the same key, so key by the full address.
+  ipv6Subnet: false,
   skip: (req) => MONITORING_PATHS.some((path) => req.path.startsWith(path)),
 });
 

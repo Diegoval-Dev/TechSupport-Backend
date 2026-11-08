@@ -73,6 +73,10 @@ services:
     container_name: techsupport-kibana
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      # Keep the support dashboard free of banners: no telemetry opt-in banner and
+      # no "Your data is not secure" toast (security is disabled on purpose in this stack).
+      TELEMETRY_ENABLED: 'false'
+      XPACK_SECURITY_SHOWINSECURECLUSTERWARNING: 'false'
     ports:
       - '5601:5601'
     depends_on:
