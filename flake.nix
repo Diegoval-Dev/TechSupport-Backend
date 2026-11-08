@@ -17,7 +17,10 @@
   in {
     devShells = forAllSystems (system: let
       pkgs = nixpkgsFor.${system};
-      python = pkgs.python3.withPackages (p: [p.requests]);
+      python = pkgs.python3.withPackages (p: [
+        p.requests
+        p.psycopg2
+      ]);
     in {
       default = pkgs.mkShell {
         packages = [
