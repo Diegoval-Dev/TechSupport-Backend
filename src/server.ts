@@ -10,6 +10,7 @@ import { startSlaEventWorker } from './infrastructure/workers/slaEventWorker';
 import { prisma } from './infrastructure/database/prisma';
 import bcrypt from 'bcrypt';
 import { logger } from './infrastructure/logger/logger';
+import { startProcessMetrics } from './infrastructure/observability/processMetrics';
 
 const ensureAdminUser = async () => {
   const adminEmail = 'admin@techsupport.pro';
@@ -43,6 +44,7 @@ const ensureAdminUser = async () => {
     startTicketWorker();
     startSlaEventWorker();
     startSlaScheduler();
+    startProcessMetrics();
   }
 
   app.listen(env.port, () => {
