@@ -27,7 +27,8 @@
         "span": { "properties": { "id": { "type": "keyword" } } },
         "route": { "type": "keyword" },
         "client": { "properties": { "ip": { "type": "ip" } } },
-        "user": { "properties": { "id": { "type": "keyword" }, "roles": { "type": "keyword" } } }
+        "user": { "properties": { "id": { "type": "keyword" }, "roles": { "type": "keyword" } } },
+        "user_agent": { "properties": { "original": { "type": "keyword", "ignore_above": 1024 } } }
       }
     }
   }
