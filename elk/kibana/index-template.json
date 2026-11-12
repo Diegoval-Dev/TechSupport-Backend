@@ -1,5 +1,5 @@
 {
-  "index_patterns": ["techsupport-logs-*"],
+  "index_patterns": ["logs-techsupport-api-*"],
   "priority": 200,
   "template": {
     "settings": { "number_of_shards": 1, "number_of_replicas": 0 },
