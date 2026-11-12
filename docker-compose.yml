@@ -8,6 +8,7 @@ services:
       - .env
     environment:
       LOG_FILE_PATH: /app/logs/app.log
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://apm-server:8200
     volumes:
       - ./logs:/app/logs
     depends_on:
@@ -111,6 +112,19 @@ services:
       - ./elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ./logs:/var/log/techsupport:ro
       - filebeat-data:/usr/share/filebeat/data
+    depends_on:
+      elk-setup:
+        condition: service_completed_successfully
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:${ELK_VERSION:-8.15.3}
+    container_name: techsupport-apm-server
+    user: root
+    command: ['apm-server', '-e', '-c', '/usr/share/apm-server/apm-server.yml', '--strict.perms=false']
+    ports:
+      - '8200:8200'
+    volumes:
+      - ./elk/apm/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
     depends_on:
       elk-setup:
         condition: service_completed_successfully

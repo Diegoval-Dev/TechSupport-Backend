@@ -28,7 +28,7 @@ curl -sf -X PUT "$ELASTICSEARCH_URL/_index_template/techsupport-logs" \
 echo
 # Create today's daily index (UTC) so the data view sees the template fields
 # before Filebeat ships the first line. 400 means it already exists.
-TODAY_INDEX="techsupport-logs-$(date -u +%Y.%m.%d)"
+TODAY_INDEX="logs-techsupport-api-$(date -u +%Y.%m.%d)"
 CODE=$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$ELASTICSEARCH_URL/$TODAY_INDEX")
 echo "Index $TODAY_INDEX: HTTP $CODE"
 case "$CODE" in 200|400) ;; *) echo "ERROR: could not create $TODAY_INDEX"; exit 1 ;; esac

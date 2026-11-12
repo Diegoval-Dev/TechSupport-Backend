@@ -12,11 +12,11 @@ filebeat.inputs:
 
 setup.ilm.enabled: false
 setup.template.enabled: false
-setup.template.name: techsupport-logs
-setup.template.pattern: 'techsupport-logs-*'
+setup.template.name: logs-techsupport-api
+setup.template.pattern: 'logs-techsupport-api-*'
 
 output.elasticsearch:
   hosts: ['http://elasticsearch:9200']
-  index: 'techsupport-logs-%{+yyyy.MM.dd}'
+  index: 'logs-techsupport-api-%{+yyyy.MM.dd}'
 
 logging.level: info
