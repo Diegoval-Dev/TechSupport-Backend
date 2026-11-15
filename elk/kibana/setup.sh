@@ -33,6 +33,20 @@ CODE=$(curl -s -o /dev/null -w '%{http_code}' -X PUT "$ELASTICSEARCH_URL/$TODAY_
 echo "Index $TODAY_INDEX: HTTP $CODE"
 case "$CODE" in 200|400) ;; *) echo "ERROR: could not create $TODAY_INDEX"; exit 1 ;; esac
 
+# APM error documents (exceptions recorded by OpenTelemetry) have no log.level;
+# the apm.error data stream calls this @custom pipeline, so they get "error".
+echo "Installing logs-apm.error@custom pipeline"
+curl -sf -X PUT "$ELASTICSEARCH_URL/_ingest/pipeline/logs-apm.error@custom" \
+  -H 'Content-Type: application/json' \
+  --data-binary @/setup/apm-error-pipeline.json
+echo
+# Backfill APM errors stored before the pipeline existed (none on a fresh stack).
+curl -s -X POST "$ELASTICSEARCH_URL/logs-apm.error-*/_update_by_query?pipeline=logs-apm.error@custom&conflicts=proceed&allow_no_indices=true&ignore_unavailable=true" \
+  -H 'Content-Type: application/json' \
+  --data '{"query":{"bool":{"must_not":{"exists":{"field":"log.level"}}}}}' \
+  | grep -o '"updated":[0-9]*' || true
+echo
+
 wait_for "$KIBANA_URL/api/status"
 import_ndjson /setup/dashboard.ndjson
 
