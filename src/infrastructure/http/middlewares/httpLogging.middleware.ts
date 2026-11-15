@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../logger/logger';
-import { toLoggableBody, toLoggableQuery } from '../../logger/logPayload';
+import { toLoggableBody, toLoggableQuery, truncate } from '../../logger/logPayload';
 import { LOGGED_ERROR_KEY, LoggedError } from './error.middleware';
 
 const SERVER_ERROR_STATUS = 500;
 const CLIENT_ERROR_STATUS = 400;
 // Monitoring endpoints are hit every few seconds: keep their lines small (no bodies).
 const MONITORING_PATHS = new Set(['/health', '/health/metrics', '/metrics']);
+// Request/response excerpt repeated in the message of failed requests (the full bodies are in fields).
+const MESSAGE_BODY_BYTES = 1000;
 
 const levelForStatus = (status: number) => {
   if (status >= SERVER_ERROR_STATUS) return 'error';
@@ -44,6 +46,23 @@ const captureResponseBody = (res: Response) => {
   return captured;
 };
 
+// Failed requests get a multi-line message so Kibana's log overview shows what happened at a glance:
+//   POST /api/tickets 500 · PrismaClientKnownRequestError (P2003): Foreign key constraint violated...
+//   request: {"title":"..."}
+//   response: {"message":"Internal server error"}
+const buildMessage = (
+  summary: string,
+  details: { error?: string; query?: string; request?: string; response?: string },
+) =>
+  [
+    details.error ? `${summary} · ${details.error}` : summary,
+    details.query && `query: ${details.query}`,
+    details.request && `request: ${truncate(details.request, MESSAGE_BODY_BYTES)}`,
+    details.response && `response: ${truncate(details.response, MESSAGE_BODY_BYTES)}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
 const errorFields = (err: LoggedError | undefined, status: number) => {
   if (!err) return undefined;
   return {
@@ -70,6 +89,26 @@ export const httpLoggingMiddleware = (
     const err = res.locals[LOGGED_ERROR_KEY] as LoggedError | undefined;
     // A body that failed to parse never reaches req.body; body-parser keeps the raw text on the error.
     const requestBody = req.body ?? err?.rawBody;
+    const requestBytes = toBytes(req.get('content-length'));
+    // An explicit empty JSON body ({}) is still worth showing when the client sent one.
+    const requestContent = isMonitoring
+      ? undefined
+      : (toLoggableBody(requestBody) ??
+        (requestBytes && requestBody !== undefined ? JSON.stringify(requestBody) : undefined));
+    const responseContent = isMonitoring ? undefined : toLoggableBody(responseBody?.body);
+    const query = toLoggableQuery(queryParts.join('?'));
+    const summary = `${req.method} ${urlPath} ${status}`;
+    const message =
+      isMonitoring || status < CLIENT_ERROR_STATUS
+        ? summary
+        : buildMessage(summary, {
+            error: err?.summary,
+            query,
+            request:
+              requestContent ??
+              (requestBytes ? `[${requestBytes} bytes, body not parsed]` : undefined),
+            response: responseContent,
+          });
 
     logger[levelForStatus(status)](
       {
@@ -81,8 +120,8 @@ export const httpLoggingMiddleware = (
             body: isMonitoring
               ? undefined
               : compact({
-                  bytes: toBytes(req.get('content-length')),
-                  content: toLoggableBody(requestBody),
+                  bytes: requestBytes,
+                  content: requestContent,
                 }),
           },
           response: {
@@ -92,18 +131,18 @@ export const httpLoggingMiddleware = (
               ? undefined
               : compact({
                   bytes: toBytes(res.getHeader('content-length')),
-                  content: toLoggableBody(responseBody?.body),
+                  content: responseContent,
                 }),
           },
         },
-        url: { path: urlPath, query: toLoggableQuery(queryParts.join('?')) },
+        url: { path: urlPath, query },
         user_agent: { original: req.get('user-agent') },
         user: { id: req.user?.sub, roles: req.user?.role ? [req.user.role] : undefined },
         client: { ip: req.ip },
         route: req.route?.path,
         error: errorFields(err, status),
       },
-      `${req.method} ${urlPath} ${status}`,
+      message,
     );
   });
 
