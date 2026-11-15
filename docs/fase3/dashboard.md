@@ -11,7 +11,7 @@ El dashboard es la pantalla de trabajo del personal de soporte. Responde en un v
 - URL: `http://localhost:5601/app/dashboards#/view/techsupport-monitoring`. Se importa solo al levantar el stack (`docker compose up -d --build`, servicio `elk-setup`).
 - **Tiempo real.** Rango por defecto «últimos 30 minutos» con refresco automático cada 30 s. Las horas se muestran en hora de Guatemala (UTC−6).
 - **Colores.** Verde = bien, ámbar = errores del cliente (4xx), rojo = errores del servidor (5xx) o servicio caído (DOWN).
-- **Controles.** Arriba hay dos filtros: *Endpoint (método + ruta)* filtra los paneles de la API y *Servicio monitoreado* filtra los de Heartbeat.
+- **Filtros.** El control *Endpoint (método + ruta)*, la barra de búsqueda (KQL) y los clics en un gráfico filtran los paneles de la API. Los paneles de estado (Heartbeat y salud del proceso) **siempre muestran el estado global**: no les afectan la búsqueda ni los filtros, así que buscar `http.response.status_code >= 500` no oculta qué servicio está caído.
 - Cada panel tiene un ícono ⓘ con la pregunta de soporte que responde.
 - **Huecos.** Un hueco en una serie significa que no hubo peticiones en ese intervalo, no que el valor fuera 0. Si toda la API está caída, la evidencia está en los paneles de Heartbeat.
 
@@ -20,7 +20,7 @@ El dashboard es la pantalla de trabajo del personal de soporte. Responde en un v
 | Fuente | Flujo | Índice / data view |
 |---|---|---|
 | Logs de la API | La API escribe logs JSON en formato ECS con pino en `logs/app.log`, Filebeat los lee y los envía a Elasticsearch | `logs-techsupport-api-AAAA.MM.DD` · data view «TechSupport · logs de la API» |
-| Heartbeat | 7 monitores: 4 HTTP sobre la API (`/health` cada 10 s; `/health/metrics`, `/metrics` y `POST /api/auth/login` cada 30 s) y 3 TCP sobre PostgreSQL, Redis y MongoDB (cada 30 s) | data stream `heartbeat-8.15.3` · data view «TechSupport · Heartbeat» |
+| Heartbeat | 8 monitores: 4 HTTP sobre la API (`/health` cada 10 s; `/health/metrics`, `/metrics` y `POST /api/auth/login` cada 30 s), 3 TCP sobre PostgreSQL, Redis y MongoDB, y 1 HTTP sobre Filebeat (`:5066`) para saber si los logs se están enviando (cada 30 s) | data stream `heartbeat-8.15.3` · data view «TechSupport · Heartbeat» |
 | Métricas del proceso | La API registra cada 60 s una línea `process_metrics` con CPU, uso del event loop y memoria RSS | mismo índice de logs |
 
 Cada petición HTTP queda registrada con los campos que pide el enunciado: `@timestamp`, `http.request.method`, `http.response.status_code`, `event.duration` (en nanosegundos; el dashboard lo muestra en ms), `url.path`, `service.name` y `log.level`. También guarda `user_agent.original` y `trace.id`.
@@ -49,7 +49,7 @@ and not user_agent.original:Elastic-Heartbeat*
 | **Tasa de error (5xx) en el tiempo** (`ts-error-rate-time`) | ¿Cuándo empezaron a fallar las peticiones? | La misma fórmula por intervalo, con línea de referencia en 10 % | % |
 | **Distribución por código HTTP** (`ts-http-status`) | ¿Qué códigos devuelve la API y en qué proporción? | `count()` por `http.response.status_code`, coloreado por clase (2xx, 4xx, 5xx) | peticiones |
 | **Top endpoints** (`ts-tabla-endpoints`) | ¿Qué operaciones concentran el tráfico y cuál es lenta o falla? | Por `endpoint`: peticiones, promedio, p95 y % de 5xx | peticiones / ms / % |
-| **Estado del sistema: UP/DOWN por servicio** (`ts-monitor-tiles`) | ¿Qué servicio está caído ahora mismo? | Último valor de `summary.up` por monitor; verde = UP, rojo = DOWN | estado |
+| **Estado del sistema: UP/DOWN por servicio** (`ts-monitor-tiles`) | ¿Qué servicio está caído ahora mismo? Último valor de `summary.up` **en el último minuto** por monitor; verde = UP, rojo = DOWN, **N/A = Heartbeat no reportó** (nunca un UP viejo) | estado |
 | **Servicios monitoreados** (`ts-monitor-status`) | ¿Qué dependencia incumple el 99.9 % de UC 1 y cuánto tarda cada servicio? | Por monitor: `average(summary.up)`, `average(monitor.duration.us)` y el último chequeo. El nombre se pone en rojo si está DOWN | % / ms |
 | **Línea de tiempo de estado por servicio** (`ts-availability-time`) | ¿Cuándo y cuánto tiempo estuvo caído cada servicio? | Heatmap: peor estado del intervalo por servicio | estado |
 | **Salud: errores de la aplicación** (`ts-log-levels`) | ¿Hay errores internos del servidor o de los workers? | `log.level: error / fatal`, excluyendo las líneas de peticiones y métricas | eventos |
@@ -148,6 +148,7 @@ La muestra anterior (`elk/sample/api-sample.log`, 58 líneas) se conserva.
 - **Caída total de la API.** Si la API está completamente caída, el SLO 1 por logs no ve esos minutos (un minuto sin peticiones cuenta como disponible). Esa evidencia la aporta Heartbeat.
 - **Caída de la base de datos.** Ni los tiles de la API ni la sonda de login la detectan: la sonda solo valida el cuerpo y `/health` no consulta la base. La caída se ve en el tile PostgreSQL y en la tasa de 5xx.
 - **Alcance del SLO 1.** Se calcula global, no por cliente, y con logs en lugar del contador `http_requests_total` que define la Fase 1.
+- **Pipeline de logs.** Si Filebeat se detiene, los paneles de tráfico bajan a 0 aunque la API siga atendiendo. El tile *Filebeat (envío de logs)* en DOWN indica que el problema es el envío de logs y no la API. Al reiniciarlo, Filebeat reenvía las líneas pendientes y no se pierde nada.
 - **Ventanas cortas.** En una ventana de pocos minutos, una caída breve baja mucho el porcentaje de disponibilidad.
 - **Idioma de la interfaz.** La interfaz de Kibana está en inglés porque la 8.15 no tiene locale `es`. Todos los títulos y etiquetas del dashboard están en español.
 - **Datos antiguos.** Los documentos anteriores a que se agregara `user_agent.original` no permiten separar las sondas de Heartbeat por agente de usuario; para esos se usa la exclusión por ruta.

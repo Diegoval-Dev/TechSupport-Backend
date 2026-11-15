@@ -53,6 +53,15 @@ heartbeat.monitors:
     schedule: '@every 30s'
     hosts: ['mongo:27017']
 
+  # Log shipping: if Filebeat stops, the API keeps serving but no logs reach Elasticsearch.
+  - type: http
+    id: filebeat
+    name: Filebeat
+    schedule: '@every 30s'
+    urls: ['http://filebeat:5066/']
+    check.response.status: [200]
+    timeout: 5s
+
 output.elasticsearch:
   hosts: ['http://elasticsearch:9200']
 
