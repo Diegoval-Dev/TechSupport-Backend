@@ -565,6 +565,15 @@ Logs, metrics and traces for the API, visualised in Kibana.
   `event.duration` (ns), `url.path`, `service.name`, `log.level`, plus
   `trace.id` / `span.id`. Sample:
   [elk/sample/api-sample.log](elk/sample/api-sample.log).
+  Each `http_request` line (`event.action: http_request`) also carries what was
+  sent and answered: `url.query`, `http.request.body.content` /
+  `http.response.body.content` (JSON, cut at 4 KB), `*.body.bytes`,
+  `*.mime_type` and, when the request failed in the error handler,
+  `error.type` / `error.message` / `error.code` (plus `error.stack_trace` for
+  5xx). Keys containing password, token, secret, authorization, cookie or api
+  key are logged as `[REDACTED]`; headers are never logged. `/health*` and
+  `/metrics` lines carry no bodies. Filter Kibana by a `trace.id` to see the
+  whole request.
 - Metrics: Prometheus at `GET /metrics` (request count, duration histogram,
   in-flight requests, 5xx counter).
 - Traces: OpenTelemetry (HTTP, Express, MongoDB, ioredis, plus one span per
