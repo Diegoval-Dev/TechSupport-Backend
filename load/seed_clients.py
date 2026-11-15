@@ -106,8 +106,8 @@ def gen_value(col: dict, index: int, enum_labels: dict):
     dtype = col["data_type"]
     udt = col["udt_name"]
 
-    if dtype == "uuid":
-        return str(uuid.uuid4())[:8]
+    if dtype == "uuid" or name == "id":
+        return str(uuid.uuid4())
     if dtype == "USER-DEFINED":
         labels = enum_labels.get(udt) or []
         # cycle through labels so every tier (e.g. VIP / NORMAL) shows up
