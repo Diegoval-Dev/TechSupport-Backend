@@ -539,4 +539,10 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Open Kibana at http://localhost:5601 and the dashboard "TechSupport Pro - Monitoring" (imported automatically by the `elk-setup` service from [elk/kibana/dashboard.ndjson](elk/kibana/dashboard.ndjson)). Elasticsearch security is disabled for local use only.
+Open Kibana at http://localhost:5601 and the dashboard "TechSupport Pro · Monitoreo de la API" (http://localhost:5601/app/dashboards#/view/techsupport-monitoring). The `elk-setup` service re-imports it from [elk/kibana/dashboard.ndjson](elk/kibana/dashboard.ndjson) with overwrite on every `up`, so edit it in Kibana with "Save" (never "Save as new") and export it back to that file before restarting. Elasticsearch security is disabled for local use only.
+
+Generating load ([load/](load/)): the API rate limiter allows `RATE_LIMIT_MAX` requests per client IP every 15 minutes (100 in `.env.example`). Raise it in `.env` before a load run (for example `RATE_LIMIT_MAX=5000`) and restart the API, otherwise the dashboard fills with 429 responses. Then run the simulated user, which needs Python with `requests`:
+
+```bash
+HOST=http://localhost:3000 python3 load/good.py   # one action per call; load/run.sh repeats it
+```
