@@ -2,7 +2,10 @@
 
 ## Summary
 
-TechSupport Pro is a backend system for technical support tickets with SLA enforcement, asynchronous Excel ingestion, and production-grade observability. It was built for a technical assessment to demonstrate clean architecture, system design, and operational maturity.
+TechSupport Pro is a backend system for technical support tickets with SLA
+enforcement, asynchronous Excel ingestion, and production-grade observability.
+It was built for a technical assessment to demonstrate clean architecture,
+system design, and operational maturity.
 
 ## Problem context
 
@@ -11,11 +14,15 @@ The company serves two client tiers:
 - VIP: 2-hour SLA with automatic escalation when breached
 - Normal: 24-hour SLA with a supervisor notification when breached
 
-In addition, the company needs to process large historical Excel files to generate performance reports.
+In addition, the company needs to process large historical Excel files to
+generate performance reports.
 
 ## Frontend
 
-A full multi-user React + TypeScript SPA lives in [frontend](frontend), with JWT auth, role-based navigation (ADMIN/SUPERVISOR/AGENTE), and screens for tickets, reports, file imports, the processing queue, and user management. See [frontend/README.md](frontend/README.md) for setup.
+A full multi-user React + TypeScript SPA lives in [frontend](frontend), with JWT
+auth, role-based navigation (ADMIN/SUPERVISOR/AGENTE), and screens for tickets,
+reports, file imports, the processing queue, and user management. See
+[frontend/README.md](frontend/README.md) for setup.
 
 ## Architecture
 
@@ -46,19 +53,19 @@ graph TD
 
 This table reflects the current codebase and is intentionally honest.
 
-| Area                                             | Status   | Evidence                                                                                                                                                                             |
-| ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Docker Compose with Node, Postgres, Mongo, Redis | Complete | [docker-compose.yml](docker-compose.yml)                                                                                                                                             |
-| CI: lint, build, tests, Docker build             | Complete | [.github/workflows/ci.yml](.github/workflows/ci.yml)                                                                                                                                 |
-| Clean architecture and separation                | Complete | [src](src)                                                                                                                                                                           |
-| Centralized error handling                       | Complete | [src/shared/errors/BaseError.ts](src/shared/errors/BaseError.ts), [src/infrastructure/http/middlewares/error.middleware.ts](src/infrastructure/http/middlewares/error.middleware.ts) |
-| Structured logging                               | Complete | [src/infrastructure/logger/logger.ts](src/infrastructure/logger/logger.ts)                                                                                                           |
-| Metrics endpoint and HTTP metrics                | Complete | [src/infrastructure/observability/metrics.ts](src/infrastructure/observability/metrics.ts)                                                                                           |
-| Async Excel processing with retries and DLQ      | Complete | [src/infrastructure/queue](src/infrastructure/queue), [src/infrastructure/workers/ticketProcessor.worker.ts](src/infrastructure/workers/ticketProcessor.worker.ts)                   |
-| Reports from MongoDB                             | Complete | [src/application/services/ReportService.ts](src/application/services/ReportService.ts)                                                                                               |
-| Ticket CRUD and SLA logic                        | Complete | CRUD with soft delete, transactional status/assignment, SLA checking with event-driven architecture ([PrismaTicketRepository.ts](src/infrastructure/repositories/PrismaTicketRepository.ts), [SLAService.ts](src/application/services/SLAService.ts)) |
+| Area                                             | Status   | Evidence                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Docker Compose with Node, Postgres, Mongo, Redis | Complete | [docker-compose.yml](docker-compose.yml)                                                                                                                                                                                                                                              |
+| CI: lint, build, tests, Docker build             | Complete | [.github/workflows/ci.yml](.github/workflows/ci.yml)                                                                                                                                                                                                                                  |
+| Clean architecture and separation                | Complete | [src](src)                                                                                                                                                                                                                                                                            |
+| Centralized error handling                       | Complete | [src/shared/errors/BaseError.ts](src/shared/errors/BaseError.ts), [src/infrastructure/http/middlewares/error.middleware.ts](src/infrastructure/http/middlewares/error.middleware.ts)                                                                                                  |
+| Structured logging                               | Complete | [src/infrastructure/logger/logger.ts](src/infrastructure/logger/logger.ts)                                                                                                                                                                                                            |
+| Metrics endpoint and HTTP metrics                | Complete | [src/infrastructure/observability/metrics.ts](src/infrastructure/observability/metrics.ts)                                                                                                                                                                                            |
+| Async Excel processing with retries and DLQ      | Complete | [src/infrastructure/queue](src/infrastructure/queue), [src/infrastructure/workers/ticketProcessor.worker.ts](src/infrastructure/workers/ticketProcessor.worker.ts)                                                                                                                    |
+| Reports from MongoDB                             | Complete | [src/application/services/ReportService.ts](src/application/services/ReportService.ts)                                                                                                                                                                                                |
+| Ticket CRUD and SLA logic                        | Complete | CRUD with soft delete, transactional status/assignment, SLA checking with event-driven architecture ([PrismaTicketRepository.ts](src/infrastructure/repositories/PrismaTicketRepository.ts), [SLAService.ts](src/application/services/SLAService.ts))                                 |
 | Auth endpoints and roles                         | Complete | Login/refresh/logout/register with persistent user storage, bcrypt hashing, 7-day refresh token rotation, role-based access control ([PrismaUserRepository.ts](src/infrastructure/repositories/PrismaUserRepository.ts), [TokenService.ts](src/application/services/TokenService.ts)) |
-| ADRs documented                                  | Complete | [docs/adr](docs/adr)                                                                                                                                                                 |
+| ADRs documented                                  | Complete | [docs/adr](docs/adr)                                                                                                                                                                                                                                                                  |
 
 ## Tech stack
 
@@ -87,15 +94,19 @@ MongoDB:
 - Centralized error handling with typed errors and HTTP status codes
 - 30-second request timeout on all endpoints
 - JSON structured logging for all HTTP requests
-- Transactional locks on concurrent state changes (Prisma $transaction)
+- Transactional locks on concurrent state changes (Prisma \$transaction)
 - Event-driven SLA architecture with async processing (BullMQ queue + workers)
-- Persistent authentication with secure refresh tokens (bcrypt hashing, 7-day expiry)
-- Role-based access control (ADMIN, SUPERVISOR, AGENTE) on all sensitive endpoints
-- Comprehensive test coverage: 88 tests across auth, validation, RBAC, and error scenarios
+- Persistent authentication with secure refresh tokens (bcrypt hashing, 7-day
+  expiry)
+- Role-based access control (ADMIN, SUPERVISOR, AGENTE) on all sensitive
+  endpoints
+- Comprehensive test coverage: 88 tests across auth, validation, RBAC, and error
+  scenarios
 
 ## Error Handling
 
-All API endpoints return consistent error responses in the following JSON format:
+All API endpoints return consistent error responses in the following JSON
+format:
 
 ```json
 {
@@ -106,20 +117,21 @@ All API endpoints return consistent error responses in the following JSON format
 
 ### HTTP Status Codes
 
-| Code | Meaning | When it occurs |
-|------|---------|----------------|
-| `200` | OK | Successful GET or PATCH with response body |
-| `201` | Created | Successfully created a resource (POST) |
-| `204` | No Content | Successful deletion (DELETE) or logout |
-| `400` | Bad Request | Validation errors, invalid format, missing required fields, malformed UUID |
-| `401` | Unauthorized | Missing or invalid authentication header, expired/invalid token |
-| `403` | Forbidden | Authenticated but insufficient permissions (role-based access) |
-| `404` | Not Found | Resource doesn't exist (ticket, process, etc.) |
-| `500` | Internal Server Error | Unexpected server error |
+| Code  | Meaning               | When it occurs                                                             |
+| ----- | --------------------- | -------------------------------------------------------------------------- |
+| `200` | OK                    | Successful GET or PATCH with response body                                 |
+| `201` | Created               | Successfully created a resource (POST)                                     |
+| `204` | No Content            | Successful deletion (DELETE) or logout                                     |
+| `400` | Bad Request           | Validation errors, invalid format, missing required fields, malformed UUID |
+| `401` | Unauthorized          | Missing or invalid authentication header, expired/invalid token            |
+| `403` | Forbidden             | Authenticated but insufficient permissions (role-based access)             |
+| `404` | Not Found             | Resource doesn't exist (ticket, process, etc.)                             |
+| `500` | Internal Server Error | Unexpected server error                                                    |
 
 ### Examples
 
 **Validation error (400):**
+
 ```json
 {
   "message": "Invalid request body",
@@ -128,6 +140,7 @@ All API endpoints return consistent error responses in the following JSON format
 ```
 
 **Not found (404):**
+
 ```json
 {
   "message": "Ticket not found"
@@ -135,6 +148,7 @@ All API endpoints return consistent error responses in the following JSON format
 ```
 
 **Unauthorized (401):**
+
 ```json
 {
   "message": "Unauthorized: invalid or expired token"
@@ -168,6 +182,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Login response:**
+
 ```json
 {
   "accessToken": "eyJhbGc...",
@@ -176,7 +191,10 @@ Authorization: Bearer <access_token>
 }
 ```
 
-The access token expires in 15 minutes. Use the refresh token to get a new token pair (refresh token valid for 7 days). Note: `/api/auth/refresh` requires the current (still valid) access token in the `Authorization` header, so clients should renew proactively before expiry rather than waiting for a 401.
+The access token expires in 15 minutes. Use the refresh token to get a new token
+pair (refresh token valid for 7 days). Note: `/api/auth/refresh` requires the
+current (still valid) access token in the `Authorization` header, so clients
+should renew proactively before expiry rather than waiting for a 401.
 
 Tickets:
 
@@ -224,6 +242,7 @@ Reports:
 ### Authentication flow
 
 **1. Login to get tokens:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -234,6 +253,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 Response:
+
 ```json
 {
   "accessToken": "eyJhbGc...",
@@ -243,12 +263,14 @@ Response:
 ```
 
 **2. Use access token for protected endpoints:**
+
 ```bash
 curl -X GET http://localhost:3000/api/tickets \
   -H "Authorization: Bearer eyJhbGc..."
 ```
 
 **3. Refresh your token when it expires:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/refresh \
   -H "Authorization: Bearer <old_access_token>" \
@@ -259,6 +281,7 @@ curl -X POST http://localhost:3000/api/auth/refresh \
 ### Ticket operations
 
 **Create a ticket:**
+
 ```bash
 curl -X POST http://localhost:3000/api/tickets \
   -H "Authorization: Bearer <token>" \
@@ -271,6 +294,7 @@ curl -X POST http://localhost:3000/api/tickets \
 ```
 
 **Update ticket status:**
+
 ```bash
 curl -X PATCH http://localhost:3000/api/tickets/550e8400-e29b-41d4-a716-446655440000/status \
   -H "Authorization: Bearer <token>" \
@@ -279,6 +303,7 @@ curl -X PATCH http://localhost:3000/api/tickets/550e8400-e29b-41d4-a716-44665544
 ```
 
 **List tickets with filters:**
+
 ```bash
 curl -X GET "http://localhost:3000/api/tickets?status=OPEN&priority=1&page=1&pageSize=20" \
   -H "Authorization: Bearer <token>"
@@ -310,7 +335,8 @@ Error handling and validation:
 
 - Zod schemas validate all request bodies and query parameters
 - Controllers catch validation errors and return 400 with descriptive messages
-- Repository errors are converted to appropriate HTTP status codes (404, 400, 500)
+- Repository errors are converted to appropriate HTTP status codes (404, 400,
+  500\)
 - Error middleware ensures all routes return consistent JSON error responses
 
 Testing:
@@ -319,7 +345,8 @@ Testing:
 - Auth endpoints: login, register, refresh, logout with token validation
 - Ticket CRUD: create, list, update status, assign agent, delete with filtering
 - Validation: UUID format, enum values, required fields, length constraints
-- Error scenarios: missing auth, invalid tokens, missing headers, malformed requests
+- Error scenarios: missing auth, invalid tokens, missing headers, malformed
+  requests
 - RBAC: role-based access control enforcement on protected endpoints
 - All tests passing with Jest and Supertest
 
@@ -343,7 +370,8 @@ cd TechSupport-Backend
 
 ### Environment setup
 
-The project includes an `.env.example` file with all required variables. Copy it to create your local configuration:
+The project includes an `.env.example` file with all required variables. Copy it
+to create your local configuration:
 
 ```bash
 cp .env.example .env
@@ -381,7 +409,8 @@ The API will be available at `http://localhost:3000`
 
 **First time setup:**
 
-The database schema is automatically created on startup via the `start.sh` entrypoint script.
+The database schema is automatically created on startup via the `start.sh`
+entrypoint script.
 
 **Default credentials:**
 
@@ -404,7 +433,8 @@ You should see an access token in the response.
 
 ### Testing
 
-The project includes 88 comprehensive tests covering authentication, validation, CRUD operations, error handling, and RBAC:
+The project includes 88 comprehensive tests covering authentication, validation,
+CRUD operations, error handling, and RBAC:
 
 ```bash
 # Run all tests with coverage
@@ -419,6 +449,7 @@ npm test -- tests/tickets.test.ts
 ```
 
 **Test coverage includes:**
+
 - ✅ Auth endpoints (login, register, refresh, logout)
 - ✅ Ticket CRUD operations
 - ✅ Validation schemas and error responses
@@ -529,20 +560,76 @@ src/
 
 Logs, metrics and traces for the API, visualised in Kibana.
 
-- Logs: ECS-formatted JSON (pino) written to stdout and `logs/app.log`. Fields include `@timestamp`, `http.request.method`, `http.response.status_code`, `event.duration` (ns), `url.path`, `service.name`, `log.level`, plus `trace.id` / `span.id`. Sample: [elk/sample/api-sample.log](elk/sample/api-sample.log).
-- Metrics: Prometheus at `GET /metrics` (request count, duration histogram, in-flight requests, 5xx counter).
-- Traces: OpenTelemetry (HTTP, Express, MongoDB, ioredis, plus one span per Prisma/Postgres query from a Prisma middleware). Each request trace shows its middlewares, handler and database calls, and APM lists `postgresql` and `mongodb` as dependencies. Trace ids are correlated into logs. Spans are exported over OTLP/protobuf to the `apm-server` container (`OTEL_EXPORTER_OTLP_ENDPOINT=http://apm-server:8200`, set in `docker-compose.yml`) and show up in Kibana under Observability → APM → Services / Traces.
-- Pipeline: API → `logs/` → Filebeat → Elasticsearch (`logs-techsupport-api-*`, matched by Kibana's `logs-*-*` Logs Explorer) → Kibana; API → OTLP → APM Server → Elasticsearch (`traces-apm-*`). Heartbeat probes the API, the databases and Filebeat ([elk/heartbeat/heartbeat.yml](elk/heartbeat/heartbeat.yml)).
+- Logs: ECS-formatted JSON (pino) written to stdout and `logs/app.log`. Fields
+  include `@timestamp`, `http.request.method`, `http.response.status_code`,
+  `event.duration` (ns), `url.path`, `service.name`, `log.level`, plus
+  `trace.id` / `span.id`. Sample:
+  [elk/sample/api-sample.log](elk/sample/api-sample.log).
+- Metrics: Prometheus at `GET /metrics` (request count, duration histogram,
+  in-flight requests, 5xx counter).
+- Traces: OpenTelemetry (HTTP, Express, MongoDB, ioredis, plus one span per
+  Prisma/Postgres query from a Prisma middleware). Each request trace shows its
+  middlewares, handler and database calls, and APM lists `postgresql` and
+  `mongodb` as dependencies. Trace ids are correlated into logs. Spans are
+  exported over OTLP/protobuf to the `apm-server` container
+  (`OTEL_EXPORTER_OTLP_ENDPOINT=http://apm-server:8200`, set in
+  `docker-compose.yml`) and show up in Kibana under Observability → APM →
+  Services / Traces.
+- Pipeline: API → `logs/` → Filebeat → Elasticsearch (`logs-techsupport-api-*`,
+  matched by Kibana's `logs-*-*` Logs Explorer) → Kibana; API → OTLP → APM
+  Server → Elasticsearch (`traces-apm-*`). Heartbeat probes the API and
+  databases ([elk/heartbeat/heartbeat.yml](elk/heartbeat/heartbeat.yml)).
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-Open Kibana at http://localhost:5601 and the dashboard "TechSupport Pro · Monitoreo de la API" (http://localhost:5601/app/dashboards#/view/techsupport-monitoring). The `elk-setup` service re-imports it from [elk/kibana/dashboard.ndjson](elk/kibana/dashboard.ndjson) with overwrite on every `up`, so edit it in Kibana with "Save" (never "Save as new") and export it back to that file before restarting. Elasticsearch security is disabled for local use only.
+Open Kibana at http://localhost:5601 and the dashboard "TechSupport Pro ·
+Monitoreo de la API"
+(http://localhost:5601/app/dashboards#/view/techsupport-monitoring). The
+`elk-setup` service re-imports it from
+[elk/kibana/dashboard.ndjson](elk/kibana/dashboard.ndjson) with overwrite on
+every `up`, so edit it in Kibana with "Save" (never "Save as new") and export it
+back to that file before restarting. Elasticsearch security is disabled for
+local use only.
 
-Generating load ([load/](load/)): the API rate limiter allows `RATE_LIMIT_MAX` requests per client IP every 15 minutes (100 in `.env.example`). Raise it in `.env` before a load run (for example `RATE_LIMIT_MAX=5000`) and restart the API, otherwise the dashboard fills with 429 responses. Then run the simulated user, which needs Python with `requests`:
+Generating load ([load/](load/)): the API rate limiter allows `RATE_LIMIT_MAX`
+requests per client IP every 15 minutes (100 in `.env.example`). Raise it in
+`.env` before a load run (for example `RATE_LIMIT_MAX=5000`) and restart the
+API, otherwise the dashboard fills with 429 responses. Then run the simulated
+user, which needs Python with `requests`:
 
 ```bash
 HOST=http://localhost:3000 python3 load/good.py   # one action per call; load/run.sh repeats it
+```
+
+## Tasks
+
+### good
+
+Run the load script that stays between SLOs.
+
+```bash
+cd ./load/
+./run.sh ./good.py
+```
+
+### bad
+
+Run the load script that stays fails SLOs.
+
+```bash
+cd ./load/
+./run.sh ./bad.py
+```
+
+### reset
+
+Erase the ClientDB and reset the script. The environment must be active!
+
+```bash
+docker compose exec postgres psql -U techsupport -d techsupport -c 'delete from "Ticket"; delete from "Client";'
+cd ./load/
+./good.py --reset
 ```

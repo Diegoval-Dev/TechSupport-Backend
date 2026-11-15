@@ -27,6 +27,7 @@
           pkgs.docker-compose
           python
           pkgs.ruff
+          pkgs.xc
         ];
       };
     });
