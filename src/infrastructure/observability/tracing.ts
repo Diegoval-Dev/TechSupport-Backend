@@ -6,6 +6,7 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
+import { MongoDBInstrumentation } from '@opentelemetry/instrumentation-mongodb';
 import { SERVICE_NAME } from './serviceInfo';
 
 const IGNORED_PATHS = ['/health', '/metrics'];
@@ -21,6 +22,14 @@ export const startTracing = () => {
       new ExpressInstrumentation(),
       new PgInstrumentation(),
       new IORedisInstrumentation(),
+      // Postgres queries go through Prisma's query engine, not the `pg` driver: they are traced by the
+      // Prisma middleware in infrastructure/database/prisma.ts instead.
+      new MongoDBInstrumentation({
+        enhancedDatabaseReporting: false,
+        // The instrumentation only emits the new `db.system.name`; Elastic APM 8.15 needs the older
+        // `db.system` to classify the span as a MongoDB database call.
+        responseHook: (span) => span.setAttribute('db.system', 'mongodb'),
+      }),
     ],
   });
 
