@@ -1,6 +1,4 @@
 {
   "description": "TechSupport: APM error documents (exceptions OpenTelemetry records on spans) carry no log.level, so Logs Explorer showed them without a level badge. Give them log.level=error.",
-  "processors": [
-    { "set": { "field": "log.level", "value": "error", "override": false } }
-  ]
+  "processors": [{ "set": { "field": "log.level", "value": "error", "override": false } }]
 }
