@@ -586,7 +586,12 @@ Logs, metrics and traces for the API, visualised in Kibana.
   exported over OTLP/protobuf to the `apm-server` container
   (`OTEL_EXPORTER_OTLP_ENDPOINT=http://apm-server:8200`, set in
   `docker-compose.yml`) and show up in Kibana under Observability → APM →
-  Services / Traces.
+  Services / Traces. Every exception recorded on a span also becomes an APM
+  error document (`logs-apm.error-*`), which Logs Explorer lists next to the
+  API logs with the same `trace.id`; `elk-setup` installs the
+  `logs-apm.error@custom` ingest pipeline
+  ([elk/kibana/apm-error-pipeline.json](elk/kibana/apm-error-pipeline.json)) so
+  they carry `log.level: error`.
 - Pipeline: API → `logs/` → Filebeat → Elasticsearch (`logs-techsupport-api-*`,
   matched by Kibana's `logs-*-*` Logs Explorer) → Kibana; API → OTLP → APM
   Server → Elasticsearch (`traces-apm-*`). Heartbeat probes the API and
