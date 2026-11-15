@@ -27,18 +27,22 @@ afterEach(() => {
   spies.forEach((spy) => spy.mockRestore());
 });
 
+const loggedCalls = () =>
+  spies.flatMap((spy) => spy.mock.calls).map(([fields, message]) => ({ fields, message }));
+
 // The http_request line is written on 'finish', which can land just after supertest resolves.
-const httpLine = async (): Promise<LogLine> => {
+const httpCall = async (): Promise<{ fields: LogLine; message: string }> => {
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    const line = spies
-      .flatMap((spy) => spy.mock.calls)
-      .map(([fields]) => fields as LogLine)
-      .find((fields) => fields?.event?.action === 'http_request');
-    if (line) return line;
+    const call = loggedCalls().find(
+      ({ fields }) => (fields as LogLine)?.event?.action === 'http_request',
+    );
+    if (call) return call as { fields: LogLine; message: string };
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
   throw new Error('no http_request log line');
 };
+
+const httpLine = async () => (await httpCall()).fields;
 
 describe('HTTP request logging', () => {
   it('logs the login request body with the password redacted', async () => {
@@ -73,6 +77,9 @@ describe('HTTP request logging', () => {
     expect(line.error?.code).toBe('entity.parse.failed');
     expect(line.error?.stack_trace).toBeTruthy();
     expect(line.http.request.body?.content).toContain('"email":"a@b.com"');
+    expect((await httpCall()).message).toMatch(
+      /^POST \/api\/auth\/login 500 · SyntaxError \(entity\.parse\.failed\): .+\nrequest: \{"email":"a@b\.com","password":"\[REDACTED\]",\nresponse: \{"message":"Internal server error"\}$/,
+    );
     expect(line.http.request.body?.bytes).toBeGreaterThan(0);
     expect(line.http.response.body?.content).toBe('{"message":"Internal server error"}');
     expect(JSON.stringify(line)).not.toContain('hunter2-password');
@@ -95,6 +102,13 @@ describe('HTTP request logging', () => {
     const line = await httpLine();
     expect(line.url.path).toBe('/api/nonexistent');
     expect(line.url.query).toBe(`page=2&token=${REDACTED}`);
+    expect((await httpCall()).message).toContain(`query: page=2&token=${REDACTED}`);
+  });
+
+  it('keeps successful request messages on one line', async () => {
+    await request(app).get('/health/metrics');
+
+    expect((await httpCall()).message).toBe('GET /health/metrics 200');
   });
 
   it('keeps monitoring lines small', async () => {
@@ -114,8 +128,17 @@ describe('HTTP request logging (isolated app)', () => {
   testApp.post('/login', (_req, res) => {
     res.json({ accessToken: 'a.b.c', refreshToken: 'd.e.f', user: { id: 1, email: 'a@b.com' } });
   });
+  const prismaMessage = [
+    '',
+    'Invalid `prisma_1.prisma.ticket.create()` invocation in',
+    '/app/dist/infrastructure/repositories/PrismaTicketRepository.js:11:54',
+    '',
+    '  10     async create(ticket) {',
+    '→ 11         const created = await prisma_1.prisma.ticket.create(',
+    'Foreign key constraint violated: `Ticket_clientId_fkey (index)`',
+  ].join('\n');
   testApp.post('/tickets', (_req: Request, _res: Response, next: NextFunction) => {
-    const err = Object.assign(new Error('Foreign key constraint violated: Ticket_clientId_fkey'), {
+    const err = Object.assign(new Error(prismaMessage), {
       name: 'PrismaClientKnownRequestError',
       code: 'P2003',
     });
@@ -138,13 +161,23 @@ describe('HTTP request logging (isolated app)', () => {
   it('puts the cause of a 500 on the http_request line', async () => {
     await request(testApp).post('/tickets').send({ clientId: 'missing', title: 'Printer' });
 
-    const line = await httpLine();
+    const { fields: line, message } = await httpCall();
     expect(line.http.response.status_code).toBe(500);
     expect(line.error).toMatchObject({
       type: 'PrismaClientKnownRequestError',
-      message: 'Foreign key constraint violated: Ticket_clientId_fkey',
+      message: prismaMessage,
       code: 'P2003',
     });
+    expect(message).toBe(
+      [
+        'POST /tickets 500 · PrismaClientKnownRequestError (P2003): Foreign key constraint violated: `Ticket_clientId_fkey (index)`',
+        'request: {"clientId":"missing","title":"Printer"}',
+        'response: {"message":"Internal server error"}',
+      ].join('\n'),
+    );
+    expect(loggedCalls().map((call) => call.message)).toContain(
+      'Unexpected error on POST /tickets: PrismaClientKnownRequestError (P2003): Foreign key constraint violated: `Ticket_clientId_fkey (index)`',
+    );
     expect(line.error?.stack_trace).toBeTruthy();
     expect(JSON.parse(line.http.request.body?.content as string)).toEqual({
       clientId: 'missing',

@@ -571,8 +571,12 @@ Logs, metrics and traces for the API, visualised in Kibana.
   the error handler, `error.type` / `error.message` / `error.code` (plus
   `error.stack_trace` for 5xx). Keys containing password, token, secret,
   authorization, cookie or api key are logged as `[REDACTED]`; headers are never
-  logged. `/health*` and `/metrics` lines carry no bodies. Filter Kibana by a
-  `trace.id` to see the whole request.
+  logged. `/health*` and `/metrics` lines carry no bodies. For 4xx/5xx the
+  `message` itself spells it out (first line
+  `METHOD path status · ErrorType (code): cause`, then `request:` / `response:`
+  excerpts), so Logs Explorer's overview shows it; the "Unexpected error" line
+  also names the request and the cause. Filter Kibana by a `trace.id` to see the
+  whole request.
 - Metrics: Prometheus at `GET /metrics` (request count, duration histogram,
   in-flight requests, 5xx counter).
 - Traces: OpenTelemetry (HTTP, Express, MongoDB, ioredis, plus one span per
