@@ -11,11 +11,46 @@
         "service": { "properties": { "name": { "type": "keyword" } } },
         "http": {
           "properties": {
-            "request": { "properties": { "method": { "type": "keyword" } } },
-            "response": { "properties": { "status_code": { "type": "integer" } } }
+            "request": {
+              "properties": {
+                "method": { "type": "keyword" },
+                "mime_type": { "type": "keyword", "ignore_above": 256 },
+                "body": {
+                  "properties": {
+                    "bytes": { "type": "long" },
+                    "content": { "type": "match_only_text" }
+                  }
+                }
+              }
+            },
+            "response": {
+              "properties": {
+                "status_code": { "type": "integer" },
+                "mime_type": { "type": "keyword", "ignore_above": 256 },
+                "body": {
+                  "properties": {
+                    "bytes": { "type": "long" },
+                    "content": { "type": "match_only_text" }
+                  }
+                }
+              }
+            }
           }
         },
-        "url": { "properties": { "path": { "type": "keyword" } } },
+        "url": {
+          "properties": {
+            "path": { "type": "keyword" },
+            "query": { "type": "keyword", "ignore_above": 2048 }
+          }
+        },
+        "error": {
+          "properties": {
+            "type": { "type": "keyword", "ignore_above": 1024 },
+            "code": { "type": "keyword", "ignore_above": 1024 },
+            "message": { "type": "match_only_text" },
+            "stack_trace": { "type": "match_only_text" }
+          }
+        },
         "event": {
           "properties": {
             "duration": { "type": "long" },
