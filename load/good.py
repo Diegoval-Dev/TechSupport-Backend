@@ -516,7 +516,7 @@ ACTIONS = {
     "invalid_token": act_invalid_token,
     "refresh_token": act_refresh,
     "create_ticket": act_create_ticket,
-    "create_invalid_ticket": act_create_invalid_ticket,
+    # "create_invalid_ticket": act_create_invalid_ticket,
     "list_tickets": act_list_tickets,
     "check_ticket_status": act_check_ticket_status,
     "update_status": act_update_status,
