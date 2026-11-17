@@ -51,7 +51,7 @@ if not HOST.startswith(("http://", "https://")):
 EMAIL = os.environ.get("USER_EMAIL", "admin@techsupport.pro")
 PASSWORD = os.environ.get("USER_PASSWORD", "admin123")
 FAIL_RATE = float(os.environ.get("FAIL_RATE", "0.3"))
-CREATE_FAIL_RATE = float(os.environ.get("CREATE_FAIL_RATE", "0.25"))
+CREATE_FAIL_RATE = float(os.environ.get("CREATE_FAIL_RATE", "0.05"))
 ENV_CLIENT_IDS = [
     c.strip() for c in os.environ.get("CLIENT_IDS", "").split(",") if c.strip()
 ]
